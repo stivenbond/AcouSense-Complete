@@ -1,0 +1,37 @@
+services:
+  webui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${PUBLIC_ESP_API_ORIGIN}
+        VITE_AUTH_BASE_URL: ${PUBLIC_AUTH_ORIGIN}
+        VITE_USE_BACKEND: "true"
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  auth:
+    build:
+      context: ./auth-server
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3030
+      NODE_ENV: production
+      DEMO_MODE: ${DEMO_MODE}
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      VITE_APP_URL: ${PUBLIC_WEB_ORIGIN}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+    volumes:
+      - auth_data:/data
+    ports:
+      - "3030:3030"
+    restart: unless-stopped
+
+volumes:
+  auth_data:

@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { acousense } from "./acousenseApi";
+import { acousense, type EspDevice, type EspReading, type EspStatusResponse } from "./acousenseApi";
 
 export interface SensorData {
   id: string;
@@ -33,6 +33,15 @@ export interface Stream {
   name: string;
   status: "ok" | "warn" | "error";
   icon: string;
+}
+
+export interface DeviceCardData {
+  id: string;
+  name: string;
+  status: "online" | "offline" | "warning";
+  lastSeen: string;
+  threshold: number;
+  signal: number;
 }
 
 export interface SensorPayload {
@@ -120,6 +129,105 @@ async function fetchFromBackend(): Promise<SensorPayload> {
   };
 }
 
+function alertLevelToStatus(alertLevel: number): SensorData["status"] {
+  if (alertLevel >= 2) return "warning";
+  return "online";
+}
+
+function rssiToSignal(rssi: number | undefined): number {
+  if (typeof rssi !== "number" || Number.isNaN(rssi)) return 0;
+  if (rssi >= -55) return 5;
+  if (rssi >= -67) return 4;
+  if (rssi >= -75) return 3;
+  if (rssi >= -85) return 2;
+  if (rssi >= -95) return 1;
+  return 0;
+}
+
+function mapEspReadingsToPayload(status: EspStatusResponse, readings: EspReading[]): SensorPayload {
+  const latest = readings[0];
+  const sensorStatus: SensorData["status"] =
+    status.arduino === "online"
+      ? alertLevelToStatus(latest?.alert_level ?? 0)
+      : "offline";
+
+  const lastTimestamp = latest?.timestamp ?? status.last_sync_ts;
+  const currentDb = Number(latest?.avg_level ?? status.last_reading?.avg_level ?? 0);
+
+  const sensors: SensorData[] = [
+    {
+      id: "ESP32-GW-1",
+      name: "AcouSense Gateway",
+      lat: 0,
+      lng: 0,
+      db: currentDb,
+      status: sensorStatus,
+      lastSeen: ageFromTimestamp(lastTimestamp),
+      threshold: 70,
+      signal: rssiToSignal(status.wifi_rssi),
+    },
+  ];
+
+  const readingRows: Reading[] = readings.map((r) => ({
+    sensor_id: "ESP32-GW-1",
+    name: "AcouSense Gateway",
+    db: Number(r.avg_level ?? 0),
+    age: ageFromTimestamp(r.timestamp),
+    status: alertLevelToStatus(Number(r.alert_level ?? 0)),
+  }));
+
+  return {
+    timestamp: new Date().toISOString(),
+    sensors,
+    readings: readingRows,
+    alerts: readingRows
+      .filter((r) => r.db >= 70)
+      .slice(0, 5)
+      .map((r, idx) => ({
+        id: idx + 1,
+        level: r.db >= 80 ? "critical" : "warning",
+        message: `${r.sensor_id} measured ${r.db.toFixed(1)} dB`,
+        time: r.age,
+        sensor: r.sensor_id,
+      })),
+    streams: [
+      { name: "ESP32 API", status: "ok", icon: "server" },
+      { name: "Arduino SPI", status: status.arduino === "online" ? "ok" : "error", icon: "memory" },
+      { name: "SD Card", status: status.sd_card === "ok" ? "ok" : "error", icon: "storage" },
+      { name: "Bluetooth", status: status.bt_status === "SCANNING" || status.bt_status === "SYNCING" ? "ok" : "warn", icon: "bluetooth" },
+    ],
+    timeSeries: readings
+      .slice()
+      .reverse()
+      .map((r) => ({
+        time: new Date(r.timestamp * 1000).toLocaleTimeString(),
+        db: Number(r.avg_level ?? 0),
+      })),
+    stats: {
+      avgDb:
+        readings.length > 0
+          ? Number(
+              (
+                readings.reduce((sum, r) => sum + Number(r.avg_level ?? 0), 0) / readings.length
+              ).toFixed(1),
+            )
+          : currentDb,
+      peakDb: readings.reduce((max, r) => Math.max(max, Number(r.max_level ?? r.avg_level ?? 0)), currentDb),
+      breachCount: readings.filter((r) => Number(r.avg_level ?? 0) >= 70).length,
+      activeSensors: status.arduino === "online" ? 1 : 0,
+    },
+  };
+}
+
+async function fetchFromEsp(): Promise<SensorPayload> {
+  const [status, readings] = await Promise.all([
+    acousense.espStatus(),
+    acousense.espReadings({ limit: 24 }),
+  ]);
+
+  return mapEspReadingsToPayload(status, readings.data ?? []);
+}
+
 async function fetchFromSupabase(): Promise<SensorPayload> {
   const { data, error } = await supabase.functions.invoke<SensorPayload>("sensor-data");
   if (error) throw error;
@@ -127,5 +235,30 @@ async function fetchFromSupabase(): Promise<SensorPayload> {
 }
 
 export async function fetchSensorData(): Promise<SensorPayload> {
-  return USE_BACKEND ? fetchFromBackend() : fetchFromSupabase();
+  if (!USE_BACKEND) return fetchFromSupabase();
+
+  try {
+    const payload = await fetchFromBackend();
+    if (payload.readings.length > 0 || payload.stats.avgDb || payload.stats.peakDb) {
+      return payload;
+    }
+  } catch {
+    // Fall through to the ESP32-native API shape.
+  }
+
+  return fetchFromEsp();
+}
+
+export async function fetchDeviceCards(): Promise<DeviceCardData[]> {
+  const devices = await acousense.espDevices();
+  const status = await acousense.espStatus().catch(() => null);
+
+  return devices.map((device: EspDevice) => ({
+    id: device.mac_address,
+    name: device.user_identifier || device.mac_address,
+    status: status?.arduino === "online" ? "online" : "offline",
+    lastSeen: ageFromTimestamp(device.last_seen),
+    threshold: 70,
+    signal: rssiToSignal(status?.wifi_rssi),
+  }));
 }

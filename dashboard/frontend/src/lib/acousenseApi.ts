@@ -29,6 +29,42 @@ export interface BackendExposureMetrics {
   [k: string]: unknown;
 }
 
+export interface EspStatusResponse {
+  arduino: "online" | "offline";
+  sd_card: "ok" | "error";
+  wifi_rssi: number;
+  bt_status: string;
+  last_sync_ts: number;
+  last_reading?: {
+    avg_level: number;
+    max_level: number;
+    alert_level: number;
+  } | null;
+}
+
+export interface EspReading {
+  id: number;
+  timestamp: number;
+  min_level: number;
+  max_level: number;
+  avg_level: number;
+  alert_level: number;
+}
+
+export interface EspReadingsResponse {
+  total: number;
+  limit: number;
+  offset: number;
+  data: EspReading[];
+}
+
+export interface EspDevice {
+  id: number;
+  mac_address: string;
+  user_identifier: string;
+  last_seen: number;
+}
+
 export interface BackendHeatmapPoint {
   lat: number;
   lng: number;
@@ -62,4 +98,8 @@ export const acousense = {
     api.get<{ type: "FeatureCollection"; features: unknown[] }>(
       "/api/heatmap/contours",
     ),
+  espStatus: () => api.get<EspStatusResponse>("/api/status"),
+  espReadings: (opts?: { from?: number; to?: number; limit?: number; offset?: number }) =>
+    api.get<EspReadingsResponse>("/api/readings", opts),
+  espDevices: () => api.get<EspDevice[]>("/api/devices"),
 };

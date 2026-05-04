@@ -22,7 +22,8 @@ export interface AuthResult {
   status?: number;
 }
 
-const BASE = "/api/auth";
+const AUTH_BASE = (import.meta.env.VITE_AUTH_BASE_URL ?? "").replace(/\/$/, "");
+const BASE = AUTH_BASE ? `${AUTH_BASE}/api/auth` : "/api/auth";
 
 async function request<T>(
   path: string,

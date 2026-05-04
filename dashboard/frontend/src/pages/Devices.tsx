@@ -1,15 +1,24 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { M3Card } from "@/components/M3Card";
 import { Icon } from "@/components/Icon";
 import { sensors } from "@/lib/mockData";
+import { fetchDeviceCards } from "@/lib/sensorApi";
 
 const tabs = ["All", "Online", "Offline", "Warning"];
 
 const Devices: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [search, setSearch] = useState("");
+  const { data } = useQuery({
+    queryKey: ["devices"],
+    queryFn: fetchDeviceCards,
+    retry: 1,
+  });
 
-  const filtered = sensors.filter(d => {
+  const deviceList = data && data.length > 0 ? data : sensors;
+
+  const filtered = deviceList.filter(d => {
     const matchTab = activeTab === 0 || 
       (activeTab === 1 && d.status === "online") ||
       (activeTab === 2 && d.status === "offline") ||
