@@ -1,0 +1,28 @@
+{
+  "name": "acousense-auth-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "postinstall": "node -e \"try { require('better-sqlite3') } catch (e) { if (e.code === 'ERR_DLOPEN_FAILED') { console.log('Rebuilding better-sqlite3 for current Node version...'); require('child_process').execSync('npm rebuild better-sqlite3', { stdio: 'inherit' }) } }\""
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^11.10.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "nodemailer": "^8.0.5"
+  }
+}

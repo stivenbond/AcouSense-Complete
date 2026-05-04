@@ -1,0 +1,6 @@
+node_modules
+.env
+acousense.db
+acousense.db-shm
+acousense.db-wal
+*.log

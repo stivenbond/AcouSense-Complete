@@ -1,0 +1,278 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════
+   M3 EXPRESSIVE — ACOUSENSE DARK THEME
+   Seed color: #1B6B35 (forest green, environmental)
+═══════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ── Primary ── */
+    --primary: 136 76% 67%;
+    --primary-foreground: 152 100% 11%;
+    --primary-container: 155 100% 16%;
+    --primary-container-foreground: 143 100% 76%;
+
+    /* ── Secondary ── */
+    --secondary: 152 33% 72%;
+    --secondary-foreground: 153 72% 13%;
+    --secondary-container: 155 38% 22%;
+    --secondary-container-foreground: 148 55% 83%;
+
+    /* ── Tertiary (amber/warning) ── */
+    --tertiary: 40 82% 68%;
+    --tertiary-foreground: 40 100% 12%;
+    --tertiary-container: 40 100% 17%;
+    --tertiary-container-foreground: 40 100% 81%;
+
+    /* ── Error ── */
+    --destructive: 0 100% 85%;
+    --destructive-foreground: 0 100% 21%;
+    --error-container: 0 100% 29%;
+    --error-container-foreground: 0 100% 92%;
+
+    /* ── Surface hierarchy ── */
+    --background: 140 17% 7%;
+    --foreground: 120 10% 87%;
+    --surface: 140 17% 7%;
+    --surface-dim: 140 17% 7%;
+    --surface-bright: 120 5% 21%;
+    --surface-container-lowest: 140 17% 5%;
+    --surface-container-low: 140 11% 10%;
+    --surface-container: 140 10% 12%;
+    --surface-container-high: 140 8% 16%;
+    --surface-container-highest: 140 6% 20%;
+    --on-surface: 120 10% 87%;
+    --on-surface-variant: 120 8% 76%;
+    --surface-variant: 140 10% 27%;
+    --inverse-surface: 120 10% 87%;
+    --inverse-on-surface: 140 8% 19%;
+
+    /* ── Outline ── */
+    --outline: 120 8% 58%;
+    --outline-variant: 140 10% 27%;
+
+    /* ── Mapped shadcn tokens ── */
+    --card: 140 11% 10%;
+    --card-foreground: 120 10% 87%;
+    --popover: 140 10% 12%;
+    --popover-foreground: 120 10% 87%;
+    --muted: 140 6% 20%;
+    --muted-foreground: 120 8% 76%;
+    --accent: 155 38% 22%;
+    --accent-foreground: 148 55% 83%;
+    --border: 140 10% 27%;
+    --input: 140 10% 27%;
+    --ring: 136 76% 67%;
+
+    --radius: 0.75rem;
+
+    /* ═══ Shape scale ═══ */
+    --shape-none: 0px;
+    --shape-xs: 4px;
+    --shape-sm: 8px;
+    --shape-md: 12px;
+    --shape-lg: 16px;
+    --shape-lg-inc: 20px;
+    --shape-xl: 28px;
+    --shape-full: 9999px;
+
+    /* ═══ Motion (spring approximations) ═══ */
+    --motion-standard: cubic-bezier(0.2, 0, 0, 1);
+    --motion-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1.0);
+    --motion-emphasized-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --motion-fast: cubic-bezier(0.2, 0, 0, 1);
+    --dur-short1: 50ms;
+    --dur-short2: 100ms;
+    --dur-medium1: 200ms;
+    --dur-medium2: 300ms;
+    --dur-long1: 400ms;
+    --dur-long2: 500ms;
+
+    /* ═══ Spacing ═══ */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
+
+    --sidebar-background: 140 11% 10%;
+    --sidebar-foreground: 120 10% 87%;
+    --sidebar-primary: 136 76% 67%;
+    --sidebar-primary-foreground: 152 100% 11%;
+    --sidebar-accent: 155 38% 22%;
+    --sidebar-accent-foreground: 148 55% 83%;
+    --sidebar-border: 140 10% 27%;
+    --sidebar-ring: 136 76% 67%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     LIGHT THEME — green civic palette
+     Activated by setting data-theme="light" on <html>.
+  ═══════════════════════════════════════════════ */
+  html[data-theme="light"] {
+    --primary: 142 71% 30%;            /* #1a7f37 */
+    --primary-foreground: 0 0% 100%;
+    --primary-container: 134 50% 86%;
+    --primary-container-foreground: 142 65% 14%;
+
+    --secondary: 142 35% 38%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-container: 134 50% 90%;  /* #e6f4e6 */
+    --secondary-container-foreground: 142 60% 12%;
+
+    --tertiary: 35 80% 45%;
+    --tertiary-foreground: 0 0% 100%;
+    --tertiary-container: 35 90% 90%;
+    --tertiary-container-foreground: 35 80% 18%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --error-container: 0 70% 92%;
+    --error-container-foreground: 0 70% 25%;
+
+    /* Surface hierarchy — light greens */
+    --background: 120 50% 97%;            /* #f0faf0 */
+    --foreground: 138 30% 14%;            /* #1a2e1a */
+    --surface: 120 50% 97%;
+    --surface-dim: 120 35% 93%;
+    --surface-bright: 0 0% 100%;
+    --surface-container-lowest: 0 0% 100%; /* #ffffff */
+    --surface-container-low: 120 45% 96%;
+    --surface-container: 120 40% 94%;
+    --surface-container-high: 120 38% 92%;
+    --surface-container-highest: 120 35% 90%;
+    --on-surface: 138 30% 14%;
+    --on-surface-variant: 138 18% 32%;
+    --surface-variant: 122 33% 80%;
+    --inverse-surface: 138 30% 14%;
+    --inverse-on-surface: 120 50% 97%;
+
+    --outline: 122 30% 55%;
+    --outline-variant: 122 33% 78%;       /* #c3e6c3 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 138 30% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 138 30% 14%;
+    --muted: 120 35% 90%;
+    --muted-foreground: 138 18% 32%;
+    --accent: 134 50% 90%;
+    --accent-foreground: 142 60% 14%;
+    --border: 122 33% 78%;
+    --input: 122 33% 78%;
+    --ring: 142 71% 30%;
+
+    --sidebar-background: 120 45% 96%;
+    --sidebar-foreground: 138 30% 14%;
+    --sidebar-primary: 142 71% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 134 50% 90%;
+    --sidebar-accent-foreground: 142 60% 14%;
+    --sidebar-border: 122 33% 78%;
+    --sidebar-ring: 142 71% 30%;
+  }
+}
+
+/* ═══ Global resets ═══ */
+*, *::before, *::after { box-sizing: border-box; }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Roboto Flex', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ═══ M3 Type utility classes ═══ */
+.display-large  { font-family: 'Google Sans Display', sans-serif; font-size: 57px;  font-weight: 400; line-height: 1.12; letter-spacing: -0.25px; }
+.display-medium { font-family: 'Google Sans Display', sans-serif; font-size: 45px;  font-weight: 400; line-height: 1.16; }
+.display-small  { font-family: 'Google Sans Display', sans-serif; font-size: 36px;  font-weight: 400; line-height: 1.22; }
+.headline-large  { font-family: 'Google Sans', sans-serif; font-size: 32px;  font-weight: 400; line-height: 1.25; }
+.headline-medium { font-family: 'Google Sans', sans-serif; font-size: 28px;  font-weight: 400; line-height: 1.29; }
+.headline-small  { font-family: 'Google Sans', sans-serif; font-size: 24px;  font-weight: 400; line-height: 1.33; }
+.title-large  { font-family: 'Google Sans', sans-serif; font-size: 22px;  font-weight: 500; line-height: 1.27; }
+.title-medium { font-family: 'Google Sans', sans-serif; font-size: 16px;  font-weight: 500; line-height: 1.50; letter-spacing: 0.15px; }
+.title-small  { font-family: 'Google Sans', sans-serif; font-size: 14px;  font-weight: 500; line-height: 1.43; letter-spacing: 0.1px; }
+.body-large   { font-family: 'Roboto Flex', sans-serif; font-size: 16px;  font-weight: 400; line-height: 1.50; letter-spacing: 0.5px; }
+.body-medium  { font-family: 'Roboto Flex', sans-serif; font-size: 14px;  font-weight: 400; line-height: 1.43; letter-spacing: 0.25px; }
+.body-small   { font-family: 'Roboto Flex', sans-serif; font-size: 12px;  font-weight: 400; line-height: 1.33; letter-spacing: 0.4px; }
+.label-large  { font-family: 'Google Sans', sans-serif; font-size: 14px;  font-weight: 500; line-height: 1.43; letter-spacing: 0.1px; }
+.label-medium { font-family: 'Google Sans', sans-serif; font-size: 12px;  font-weight: 500; line-height: 1.33; letter-spacing: 0.5px; }
+.label-small  { font-family: 'Google Sans', sans-serif; font-size: 11px;  font-weight: 500; line-height: 1.45; letter-spacing: 0.5px; }
+.font-mono    { font-family: 'Roboto Mono', monospace; }
+
+/* ═══ Material icon helper ═══ */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-block;
+  user-select: none;
+}
+.material-symbols-rounded.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+/* ═══ Scrollbar styling ═══ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: hsl(var(--surface-container-low)); }
+::-webkit-scrollbar-thumb { background: hsl(var(--surface-container-highest)); border-radius: 4px; }
+
+/* ═══ Pulse animation for live readings ═══ */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-pulse-live { animation: pulse-live 2s ease-in-out infinite; }
+
+/* ═══ MapLibre overrides ═══ */
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib a {
+  background: hsl(var(--surface-container) / 0.85) !important;
+  color: hsl(var(--on-surface-variant)) !important;
+  border-radius: var(--shape-xs);
+  font-size: 10px;
+}
+.maplibregl-popup-content {
+  background: hsl(var(--surface-container-high)) !important;
+  color: hsl(var(--on-surface)) !important;
+  border: 1px solid hsl(var(--outline-variant));
+  border-radius: var(--shape-md) !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
+}
+.maplibregl-popup-tip {
+  border-top-color: hsl(var(--surface-container-high)) !important;
+  border-bottom-color: hsl(var(--surface-container-high)) !important;
+}
+
+/* ═══ Toast container ═══ */
+.acousense-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 12px 20px;
+  border-radius: var(--shape-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  animation: toast-in 220ms var(--motion-emphasized);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}

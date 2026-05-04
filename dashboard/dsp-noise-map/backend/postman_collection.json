@@ -1,0 +1,163 @@
+{
+	"info": {
+		"_postman_id": "4b68e9f2-2b36-4c4f-9e6b-7b0b2e3e5b1a",
+		"name": "AcouSense Modern API",
+		"description": "Integration tests for the AcouSense FastAPI backend.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "System Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Readings",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/readings",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"readings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Latest Per Sensor",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/latest",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"latest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Global Stats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/stats",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"stats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Exposure Metrics",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/health/exposure",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"health",
+						"exposure"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Heatmap Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/heatmap",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"heatmap"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Heatmap Matrix (Binary)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/heatmap/matrix",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"heatmap",
+						"matrix"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Heatmap Contours (GeoJSON)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/heatmap/contours",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"heatmap",
+						"contours"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000"
+		}
+	]
+}

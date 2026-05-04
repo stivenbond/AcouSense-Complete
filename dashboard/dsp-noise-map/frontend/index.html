@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSP Noise Map</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+    
+    <style>
+        :root {
+            --bg: #0a0c0f;
+            --surface: #111318;
+            --border: #1e2230;
+            --text: #e2e8f4;
+            --muted: #5a637a;
+            --accent: #3b82f6;
+            --safe: #22c55e;
+            --caution: #f59e0b;
+            --danger: #ef4444;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-mono: 'Inter', system-ui, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg);
+            color: var(--text);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            font-weight: 400;
+        }
+
+        .header { margin-bottom: 24px; }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .title { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.2px; }
+        .subtitle { font-size: 0.8rem; color: var(--muted); font-family: var(--font-sans); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .stat-value { font-family: var(--font-sans); font-size: 1.35rem; font-weight: 600; letter-spacing: -0.5px; }
+
+        .section-title { font-family: var(--font-heading); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+        .zone-legend { margin-bottom: 24px; }
+        .zone { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+        .zone-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+        .zone-danger .zone-dot { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        .zone-caution .zone-dot { background: var(--caution); box-shadow: 0 0 8px var(--caution); }
+        .zone-safe .zone-dot { background: var(--safe); box-shadow: 0 0 8px var(--safe); }
+        .zone-text { font-size: 0.85rem; line-height: 1.4; }
+        .zone-text strong { display: block; font-weight: 500; }
+        .zone-text span { color: var(--muted); font-size: 0.75rem; }
+
+        #sensor-list { margin-bottom: 24px; }
+        .sensor-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sensor-item:hover { border-color: var(--border); background: rgba(255,255,255,0.04); }
+        .sensor-id { flex-grow: 1; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 500; }
+        .sensor-val { font-family: var(--font-sans); font-size: 0.95rem; font-weight: 600; letter-spacing: -0.3px; }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.5; transform: scale(0.8); }
+        }
+        .pulsing-dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite ease-in-out; }
+
+        .controls { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+        .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; }
+        select, input[type="range"] { 
+            background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-family: var(--font-sans); outline: none;
+        }
+        select:focus { border-color: var(--accent); }
+        
+        .refresh-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .refresh-btn:hover { background: #2563eb; }
+        .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Map Styles */
+        #map-container { position: relative; height: 100%; width: 100%; }
+        #map { height: 100%; width: 100%; background: var(--bg); }
+        
+        .leaflet-tile { filter: brightness(0.85) saturate(0.7); }
+        .leaflet-control-zoom a {
+            background-color: var(--surface) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            font-family: var(--font-sans);
+        }
+        .leaflet-popup-tip { background: var(--surface); border: 1px solid var(--border); }
+        
+        .map-marker { border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        
+        #status {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(17, 19, 24, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            letter-spacing: -0.2px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            z-index: 1000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-icon">📡</div>
+                <div class="title">DSP Noise Map</div>
+            </div>
+            <div class="subtitle">ESP32 · INMP441 · MQTT</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Sensors</div>
+                <div class="stat-value" id="stat-sensors">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Readings</div>
+                <div class="stat-value" id="stat-readings">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Min Leq</div>
+                <div class="stat-value" id="stat-min">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Max Leq</div>
+                <div class="stat-value" id="stat-max">—</div>
+            </div>
+        </div>
+
+        <div class="section-title">Noise Zones</div>
+        <div class="zone-legend">
+            <div class="zone zone-danger">
+                <div class="zone-dot"></div>
+                <div class="zone-text"><strong>> 85 dB(A)</strong><span>Dangerous · Permanent hearing damage</span></div>
+            </div>
+            <div class="zone zone-caution">
+                <div class="zone-dot"></div>
+                <div class="zone-text"><strong>70 – 85 dB(A)</strong><span>Cautionary · Tiring; short exposure only</span></div>
+            </div>
+            <div class="zone zone-safe">
+                <div class="zone-dot"></div>
+                <div class="zone-text"><strong>&lt; 70 dB(A)</strong><span>Safe · Comfortable for long-term use</span></div>
+            </div>
+        </div>
+
+        <div class="section-title">Active Sensors</div>
+        <div id="sensor-list">
+            <!-- Dynamically populated -->
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <label>Time Window</label>
+                <select id="ctrl-minutes">
+                    <option value="10">10 min</option>
+                    <option value="30">30 min</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="360">6 hours</option>
+                    <option value="1440">24 hours</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <label>IDW Power (<span id="ctrl-power-val">2</span>)</label>
+                <input type="range" id="ctrl-power" min="1" max="4" step="0.5" value="2">
+            </div>
+            <div class="control-row">
+                <label>Grid Res</label>
+                <select id="ctrl-grid">
+                    <option value="20">Low (20)</option>
+                    <option value="40" selected>Med (40)</option>
+                    <option value="70">High (70)</option>
+                </select>
+            </div>
+            <button id="btn-refresh" class="refresh-btn">↻ Refresh Heatmap</button>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+        <div id="status">Connecting...</div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+        const AUTO_RELOAD = 30000;
+        
+        let map = L.map("map", { zoomControl: false }).setView([41.3275, 19.8187], 13);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        let heatLayer = null;
+        let markerLayer = L.layerGroup().addTo(map);
+
+        function zoneColor(dba) {
+            if (dba >= 85) return getComputedStyle(document.documentElement).getPropertyValue('--danger').trim();
+            if (dba >= 70) return getComputedStyle(document.documentElement).getPropertyValue('--caution').trim();
+            return getComputedStyle(document.documentElement).getPropertyValue('--safe').trim();
+        }
+
+        function zoneLabel(dba) {
+            if (dba >= 85) return "DANGER";
+            if (dba >= 70) return "CAUTION";
+            return "SAFE";
+        }
+
+        async function fetchStats() {
+            try {
+                const res = await fetch(`${API_BASE}/stats`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                document.getElementById('stat-sensors').innerText = data.sensor_count;
+                document.getElementById('stat-readings').innerText = data.reading_count > 1000 ? (data.reading_count/1000).toFixed(1) + 'k' : data.reading_count;
+                document.getElementById('stat-min').innerText = typeof data.min_dba === 'number' ? data.min_dba.toFixed(1) : "—";
+                document.getElementById('stat-max').innerText = typeof data.max_dba === 'number' ? data.max_dba.toFixed(1) : "—";
+            } catch (e) {
+                console.warn("Failed fetching stats");
+                throw e; // propagate for fallback
+            }
+        }
+
+        async function fetchSensors() {
+            const res = await fetch(`${API_BASE}/latest`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            
+            const list = document.getElementById('sensor-list');
+            list.innerHTML = "";
+            
+            data.forEach(sensor => {
+                const color = zoneColor(sensor.leq_dba);
+                const el = document.createElement('div');
+                el.className = 'sensor-item';
+                el.innerHTML = `
+                    <div class="pulsing-dot" style="background: ${color}; box-shadow: 0 0 8px ${color}"></div>
+                    <div class="sensor-id">${sensor.sensor_id}</div>
+                    <div class="sensor-val" style="color: ${color}">${sensor.leq_dba.toFixed(1)} dB</div>
+                `;
+                el.onclick = () => { map.flyTo([sensor.lat, sensor.lng], 16); };
+                list.appendChild(el);
+            });
+        }
+
+        async function fetchHeatmap() {
+            const btn = document.getElementById('btn-refresh');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            status.innerText = "Loading heatmap...";
+            
+            try {
+                const min = document.getElementById('ctrl-minutes').value;
+                const grid = document.getElementById('ctrl-grid').value;
+                const pwr = document.getElementById('ctrl-power').value;
+                
+                const res = await fetch(`${API_BASE}/heatmap?minutes=${min}&grid_n=${grid}&power=${pwr}`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                if (heatLayer) map.removeLayer(heatLayer);
+                markerLayer.clearLayers();
+                
+                if (data.grid.length === 0) {
+                    status.innerText = `No data in last ${min}m`;
+                    btn.disabled = false;
+                    return;
+                }
+                
+                const heatData = data.grid.map(pt => {
+                    // Normalize 50dB-100dB range to 0.0-1.0
+                    let intensity = (pt.leq_dba - 50) / 50; 
+                    intensity = Math.max(0, Math.min(1, intensity));
+                    return [pt.lat, pt.lng, intensity];
+                });
+                
+                heatLayer = L.heatLayer(heatData, {
+                    radius: 35,
+                    blur: 25,
+                    maxZoom: 15,
+                    gradient: { 0.0: "#22c55e", 0.45: "#86efac", 0.60: "#f59e0b", 0.80: "#fb923c", 1.0: "#ef4444" }
+                }).addTo(map);
+                
+                data.readings.forEach(r => {
+                    const color = zoneColor(r.leq_dba);
+                    const icon = L.divIcon({
+                        className: 'map-marker',
+                        html: `<div style="width: 14px; height: 14px; background: ${color}; border-radius: 50%;"></div>`,
+                        iconSize: [14, 14],
+                        iconAnchor: [7, 7]
+                    });
+                    
+                    const marker = L.marker([r.lat, r.lng], {icon}).addTo(markerLayer);
+                    marker.bindPopup(`
+                        <div style="font-weight: 600; margin-bottom: 4px; color: ${color}">${r.leq_dba.toFixed(1)} dB(A)</div>
+                        <div style="font-family: var(--font-sans); font-weight: 500; font-size: 0.85rem; color: var(--muted)">${r.sensor_id}</div>
+                        <div style="font-size: 0.75rem; margin-top: 6px; letter-spacing: 1px">${zoneLabel(r.leq_dba)}</div>
+                    `);
+                });
+                
+                map.fitBounds([
+                    [data.bbox.min_lat, data.bbox.min_lng],
+                    [data.bbox.max_lat, data.bbox.max_lng]
+                ]);
+                
+                const timeStr = new Date().toLocaleTimeString();
+                status.innerText = `Synced at ${timeStr} · ${data.readings.length} sensors · ${data.grid.length} points`;
+                
+            } catch (e) {
+                console.warn(e);
+                status.innerText = "Error fetching data";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+        
+        function injectDemoData() {
+            const status = document.getElementById('status');
+            status.innerText = "DEMO MODE · Connect backend for live data";
+            status.style.color = "var(--caution)";
+            status.style.border = "1px solid var(--caution)";
+            
+            const demoReadings = [
+                { sensor_id:"sensor-01", lat:41.3275, lng:19.8187, leq_dba:78.3 },
+                { sensor_id:"sensor-02", lat:41.3310, lng:19.8220, leq_dba:91.5 },
+                { sensor_id:"sensor-03", lat:41.3240, lng:19.8140, leq_dba:62.1 },
+                { sensor_id:"sensor-04", lat:41.3350, lng:19.8100, leq_dba:55.8 },
+                { sensor_id:"sensor-05", lat:41.3200, lng:19.8300, leq_dba:83.7 },
+            ];
+            
+            document.getElementById('stat-sensors').innerText = demoReadings.length;
+            document.getElementById('stat-readings').innerText = "DEMO";
+            document.getElementById('stat-min').innerText = "55.8";
+            document.getElementById('stat-max').innerText = "91.5";
+            
+            const list = document.getElementById('sensor-list');
+            list.innerHTML = "";
+            demoReadings.forEach(sensor => {
+                const color = zoneColor(sensor.leq_dba);
+                const el = document.createElement('div');
+                el.className = 'sensor-item';
+                el.innerHTML = `
+                    <div class="pulsing-dot" style="background: ${color}; box-shadow: 0 0 8px ${color}"></div>
+                    <div class="sensor-id">${sensor.sensor_id}</div>
+                    <div class="sensor-val" style="color: ${color}">${sensor.leq_dba.toFixed(1)} dB</div>
+                `;
+                el.onclick = () => { map.flyTo([sensor.lat, sensor.lng], 16); };
+                list.appendChild(el);
+            });
+            
+            const pwr = document.getElementById('ctrl-power').value;
+            const grid_n = 40;
+            
+            let min_lat = Math.min(...demoReadings.map(r => r.lat)) - 0.01;
+            let max_lat = Math.max(...demoReadings.map(r => r.lat)) + 0.01;
+            let min_lng = Math.min(...demoReadings.map(r => r.lng)) - 0.01;
+            let max_lng = Math.max(...demoReadings.map(r => r.lng)) + 0.01;
+            
+            const lat_step = (max_lat - min_lat) / grid_n;
+            const lng_step = (max_lng - min_lng) / grid_n;
+            
+            let grid = [];
+            for(let i=0; i<=grid_n; i++) {
+                let lat = min_lat + i * lat_step;
+                let lat_rad = lat * Math.PI / 180;
+                for(let j=0; j<=grid_n; j++) {
+                    let lng = min_lng + j * lng_step;
+                    
+                    let numer = 0, denom = 0;
+                    demoReadings.forEach(r => {
+                        let d_lat = (r.lat - lat) * 111; 
+                        let d_lng = (r.lng - lng) * 111 * Math.cos(lat_rad);
+                        let d = Math.max(Math.sqrt(d_lat*d_lat + d_lng*d_lng), 1e-6);
+                        
+                        let w = 1.0 / Math.pow(d, pwr);
+                        let linear = Math.pow(10, r.leq_dba / 10);
+                        numer += w * linear;
+                        denom += w;
+                    });
+                    
+                    let dba = 10 * Math.log10(numer / denom);
+                    grid.push([lat, lng, Math.max(0, Math.min(1, (dba - 50)/50))]);
+                }
+            }
+            
+            if (heatLayer) map.removeLayer(heatLayer);
+            markerLayer.clearLayers();
+            
+            heatLayer = L.heatLayer(grid, {
+                radius: 35, blur: 25,
+                gradient: { 0.0: "#22c55e", 0.45: "#86efac", 0.60: "#f59e0b", 0.80: "#fb923c", 1.0: "#ef4444" }
+            }).addTo(map);
+            
+            demoReadings.forEach(r => {
+                const color = zoneColor(r.leq_dba);
+                const icon = L.divIcon({
+                    className: 'map-marker',
+                    html: `<div style="width: 14px; height: 14px; background: ${color}; border-radius: 50%;"></div>`,
+                    iconSize: [14, 14], iconAnchor: [7, 7]
+                });
+                const marker = L.marker([r.lat, r.lng], {icon}).addTo(markerLayer);
+                marker.bindPopup(`
+                    <div style="font-weight: 600; margin-bottom: 4px; color: ${color}">${r.leq_dba.toFixed(1)} dB(A)</div>
+                    <div style="font-family: var(--font-sans); font-weight: 500; font-size: 0.85rem; color: var(--muted)">${r.sensor_id}</div>
+                    <div style="font-size: 0.75rem; margin-top: 6px; letter-spacing: 1px">${zoneLabel(r.leq_dba)}</div>
+                `);
+            });
+            
+            map.fitBounds([[min_lat, min_lng], [max_lat, max_lng]]);
+        }
+        
+        document.getElementById('ctrl-power').addEventListener('input', (e) => {
+            document.getElementById('ctrl-power-val').innerText = e.target.value;
+        });
+        
+        document.getElementById('btn-refresh').addEventListener('click', () => {
+            if (document.getElementById('status').innerText.includes("DEMO")) injectDemoData();
+            else fetchHeatmap();
+        });
+
+        (async () => {
+            try {
+                await fetchStats(); 
+                await fetchSensors();
+                await fetchHeatmap();
+                setInterval(async () => {
+                    await fetchStats();
+                    await fetchSensors();
+                    await fetchHeatmap();
+                }, AUTO_RELOAD);
+            } catch(e) {
+                injectDemoData();
+            }
+        })();
+    </script>
+</body>
+</html>

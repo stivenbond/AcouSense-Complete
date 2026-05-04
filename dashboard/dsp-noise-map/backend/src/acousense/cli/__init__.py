@@ -1,0 +1,3 @@
+"""
+AcouSense — CLI package init.
+"""

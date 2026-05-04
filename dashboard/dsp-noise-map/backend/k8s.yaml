@@ -1,0 +1,165 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: acousense
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: acousense-secrets
+  namespace: acousense
+type: Opaque
+stringData:
+  api-key: "placeholder" # Run: kubectl create secret generic acousense-secrets --from-literal=api-key=$(openssl rand -hex 32)
+  sqlcipher-passphrase: "placeholder" # Run: kubectl create secret generic acousense-secrets --from-literal=sqlcipher-passphrase=$(openssl rand -hex 32)
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: acousense-data-pvc
+  namespace: acousense
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 5Gi
+  # Increase storage before deploying to production.
+  # ReadWriteOnce means only one pod may mount this volume.
+  # This enforces the single-writer SQLite constraint.
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: acousense
+  namespace: acousense
+spec:
+  # IMPORTANT: Replicas must be 1. 
+  # SQLite is a single-writer, file-based database. Concurrent writers 
+  # via shared ReadWriteMany PVCs will corrupt the database.
+  # If horizontal scaling is needed, migrate to PostgreSQL or MySQL.
+  replicas: 1
+  serviceName: acousense
+  selector:
+    matchLabels:
+      app: acousense
+  template:
+    metadata:
+      labels:
+        app: acousense
+    spec:
+      containers:
+      - name: acousense
+        image: your-registry/acousense:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ACOUSENSE_DATA_DIR
+          value: "/data"
+        - name: ACOUSENSE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: acousense-secrets
+              key: api-key
+        - name: ACOUSENSE_SQLCIPHER_PASSPHRASE
+          valueFrom:
+            secretKeyRef:
+              name: acousense-secrets
+              key: sqlcipher-passphrase
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/ready
+            port: 8000
+          initialDelaySeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: acousense-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acousense
+  namespace: acousense
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: acousense
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: acousense-ingress
+  namespace: acousense
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - acousense.example.com
+    secretName: acousense-tls
+  rules:
+  - host: acousense.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: acousense
+            port:
+              number: 8000
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: acousense-maintenance
+  namespace: acousense
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: maintenance
+            image: your-registry/acousense-maintenance:latest
+            env:
+            - name: ACOUSENSE_DATA_DIR
+              value: "/data"
+            volumeMounts:
+            - name: data
+              mountPath: /data
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: acousense-data-pvc

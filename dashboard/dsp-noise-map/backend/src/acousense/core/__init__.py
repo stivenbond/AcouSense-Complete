@@ -1,0 +1,3 @@
+"""
+AcouSense — Core package init.
+"""

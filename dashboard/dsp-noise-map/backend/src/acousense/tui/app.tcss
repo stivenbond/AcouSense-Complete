@@ -1,0 +1,21 @@
+Screen {
+    background: $surface;
+}
+
+#sidebar {
+    width: 30;
+    dock: left;
+    padding: 1;
+    background: $panel;
+    border-right: vkey $background;
+}
+
+#search_input {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+#items_table {
+    width: 100%;
+    height: 100%;
+}

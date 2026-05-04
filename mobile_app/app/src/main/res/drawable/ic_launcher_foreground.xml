@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Sound Waves / Frequency visualization -->
+    <path
+        android:fillColor="#6750A4"
+        android:pathData="M24,54h4v4h-4z M32,44h4v24h-4z M40,34h4v44h-4z M48,48h4v16h-4z M56,24h4v64h-4z M64,40h4v32h-4z M72,30h4v52h-4z M80,50h4v12h-4z" />
+
+    <!-- Shield / Protection shape (subtle outline) -->
+    <path
+        android:strokeColor="#6750A4"
+        android:strokeWidth="2"
+        android:pathData="M54,15 C40,15 30,25 30,25 L30,50 C30,70 54,85 54,85 C54,85 78,70 78,50 L78,25 C78,25 68,15 54,15 Z" />
+</vector>
