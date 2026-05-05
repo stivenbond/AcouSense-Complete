@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 @Immutable
 data class SettingsUiState(
     val modelPath: String = SettingsRepository.DEFAULT_MODEL_PATH,
+    val espApiBaseUrl: String = "http://192.168.4.1",
     val retentionDays: Int = 42,
     val modelExists: Boolean = false,
     val maxTokens: Int = 1024,
@@ -40,6 +41,7 @@ class SettingsViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         SettingsUiState(
             modelPath = settingsRepository.getModelPath(),
+            espApiBaseUrl = settingsRepository.getEspApiBaseUrl(),
             retentionDays = prefs.getInt("retention_days", 42),
             modelExists = File(settingsRepository.getModelPath()).exists(),
             maxTokens = settingsRepository.inferenceSettings.value.maxTokens,
@@ -56,6 +58,12 @@ class SettingsViewModel @Inject constructor(
                         modelExists = File(modelPath).exists(),
                     )
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            settingsRepository.espApiBaseUrl.collect { baseUrl ->
+                _state.update { it.copy(espApiBaseUrl = baseUrl) }
             }
         }
 
@@ -100,6 +108,11 @@ class SettingsViewModel @Inject constructor(
         val boundedValue = value.coerceIn(7, 90)
         prefs.edit().putInt("retention_days", boundedValue).apply()
         _state.update { it.copy(retentionDays = boundedValue) }
+    }
+
+    fun updateEspApiBaseUrl(value: String) {
+        settingsRepository.setEspApiBaseUrl(value)
+        _state.update { it.copy(snackbarMessage = "ESP API base URL updated.") }
     }
 
     fun clearAllData() {

@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { M3Card } from "@/components/M3Card";
 import { M3Chip } from "@/components/M3Chip";
 import { M3Button } from "@/components/M3Button";
 import { Icon } from "@/components/Icon";
-import { generateTimeSeries, weeklyHeatmap, dayLabels } from "@/lib/mockData";
+import { weeklyHeatmap, dayLabels } from "@/lib/mockData";
+import { fetchHistorySeries } from "@/lib/sensorApi";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 
 const ranges = [
@@ -16,13 +18,12 @@ const ranges = [
 
 const History: React.FC = () => {
   const [selectedRange, setSelectedRange] = useState(2);
-  const data = useMemo(() =>
-    generateTimeSeries(ranges[selectedRange].hours).map(d => ({
-      time: d.time.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }),
-      db: Math.round(d.db * 10) / 10,
-    })),
-    [selectedRange]
-  );
+  const { data: apiData } = useQuery({
+    queryKey: ["history-series", ranges[selectedRange].hours],
+    queryFn: () => fetchHistorySeries(ranges[selectedRange].hours),
+    retry: 1,
+  });
+  const data = useMemo(() => apiData ?? [], [apiData]);
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -102,7 +103,17 @@ const History: React.FC = () => {
 
       {/* Export row */}
       <div className="flex justify-end">
-        <M3Button variant="tonal" icon="download">Export CSV</M3Button>
+        <M3Button
+          variant="tonal"
+          icon="download"
+          onClick={() => {
+            const base = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+            const target = `${base}/api/readings/export`;
+            window.open(target, "_blank", "noopener,noreferrer");
+          }}
+        >
+          Export CSV
+        </M3Button>
       </div>
     </div>
   );

@@ -171,6 +171,38 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             }
 
             item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ),
+                ) {
+                    androidx.compose.foundation.layout.Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            text = "ESP API Base URL",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        OutlinedTextField(
+                            value = state.espApiBaseUrl,
+                            onValueChange = viewModel::updateEspApiBaseUrl,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            supportingText = {
+                                Text("Example: http://192.168.1.50")
+                            },
+                        )
+                    }
+                }
+            }
+
+            item {
                 SliderCard(
                     title = "Retention Period",
                     valueLabel = "${state.retentionDays} days",

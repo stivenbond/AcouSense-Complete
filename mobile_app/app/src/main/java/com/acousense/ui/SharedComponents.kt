@@ -354,14 +354,15 @@ private fun ShimmerBlock(modifier: Modifier = Modifier) {
 fun noiseColor(level: Int): Color = when (level) {
     1 -> NoiseLow
     2 -> NoiseModerate
-    3 -> NoiseHigh
+    3, 4 -> NoiseHigh
     else -> NoiseNone
 }
 
 fun noiseLabel(level: Int): String = when (level) {
-    1 -> "LOW"
+    1 -> "CAUTION"
     2 -> "MODERATE"
     3 -> "HIGH"
+    4 -> "DANGER"
     else -> "SAFE"
 }
 

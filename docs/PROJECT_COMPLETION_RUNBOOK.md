@@ -177,6 +177,29 @@ docker compose --env-file .env -f docker-compose.server.yml up -d
 docker compose --env-file .env -f docker-compose.server.yml logs -f
 ```
 
-## 7. Important Current Limitation
+## 7. Firmware Tooling Recommendation
+
+Use PlatformIO as the primary firmware workflow.
+
+- PlatformIO config: `C:\Users\stive\.codex\worktrees\79da\AcouSense\platformio.ini`
+- PlatformIO guide: `C:\Users\stive\.codex\worktrees\79da\AcouSense\docs\PLATFORMIO_FIRMWARE_GUIDE.md`
+
+Recommended production flash targets:
+
+```text
+nano-prod
+esp32-prod
+```
+
+Recommended validation flash targets:
+
+```text
+nano-test-lcd
+nano-test-microphone
+nano-test-buzzer
+esp32-test-sdcard
+```
+
+## 8. Important Current Limitation
 
 I could prepare the deployment files and integration code, but I could not execute the actual Node, Python, or Android builds in this environment because the project dependencies are not installed locally in the workspace yet.

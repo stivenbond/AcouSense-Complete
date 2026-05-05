@@ -49,9 +49,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.acousense.data.ble.BleGattService
 import com.acousense.data.db.DailySummaryWorker
-import com.acousense.ui.aiadvice.AiAdviceScreen
 import com.acousense.ui.dashboard.MonitorScreen
 import com.acousense.ui.history.HistoryScreen
+import com.acousense.ui.recommendations.RecommendationsScreen
 import com.acousense.ui.settings.SettingsScreen
 import com.acousense.ui.theme.AcouSenseBackground
 import com.acousense.ui.theme.AcouSenseTheme
@@ -188,10 +188,9 @@ class MainActivity : ComponentActivity() {
                                     currentRoute = "ai_advice"
                                 },
                             )
-                            "ai_advice" -> AiAdviceScreen(
-                                onGoMonitor = { currentRoute = "monitor" },
-                                onGoSettings = { currentRoute = "settings" },
-                                initialDate = selectedAdviceDate,
+                            "ai_advice" -> RecommendationsScreen(
+                                selectedDate = selectedAdviceDate ?: "",
+                                onOpenSettings = { currentRoute = "settings" },
                             )
                             "settings" -> SettingsScreen()
                             else -> MonitorScreen()

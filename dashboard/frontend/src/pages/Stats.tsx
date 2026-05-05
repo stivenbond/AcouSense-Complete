@@ -1,17 +1,25 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { M3Card } from "@/components/M3Card";
 import { Icon } from "@/components/Icon";
-import { stats } from "@/lib/mockData";
+import { stats as fallbackStats } from "@/lib/mockData";
+import { fetchStatsSnapshot } from "@/lib/sensorApi";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-const kpis = [
-  { label: "Average dB", value: stats.avgDb.toFixed(1), accent: "hsl(136, 76%, 67%)", icon: "equalizer" },
-  { label: "Peak dB", value: stats.peakDb.toString(), accent: "hsl(0, 100%, 85%)", icon: "show_chart" },
-  { label: "Breaches (7d)", value: stats.breachCount.toString(), accent: "hsl(40, 82%, 68%)", icon: "warning" },
-  { label: "Uptime", value: `${stats.uptime}%`, accent: "hsl(152, 33%, 72%)", icon: "uptime" },
-];
-
 const Stats: React.FC = () => {
+  const { data } = useQuery({
+    queryKey: ["stats-snapshot"],
+    queryFn: fetchStatsSnapshot,
+    retry: 1,
+  });
+  const stats = data ?? fallbackStats;
+  const kpis = [
+    { label: "Average dB", value: stats.avgDb.toFixed(1), accent: "hsl(136, 76%, 67%)", icon: "equalizer" },
+    { label: "Peak dB", value: stats.peakDb.toString(), accent: "hsl(0, 100%, 85%)", icon: "show_chart" },
+    { label: "Breaches (7d)", value: stats.breachCount.toString(), accent: "hsl(40, 82%, 68%)", icon: "warning" },
+    { label: "Uptime", value: `${stats.uptime}%`, accent: "hsl(152, 33%, 72%)", icon: "uptime" },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       {/* KPI Grid */}

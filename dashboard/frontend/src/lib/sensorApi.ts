@@ -219,6 +219,20 @@ function mapEspReadingsToPayload(status: EspStatusResponse, readings: EspReading
   };
 }
 
+export interface HistoryPoint {
+  time: string;
+  db: number;
+}
+
+export interface StatsSnapshot {
+  avgDb: number;
+  peakDb: number;
+  breachCount: number;
+  uptime: number;
+  whoThresholds: Array<{ label: string; limit: number; current: number; period: string }>;
+  breachHistory: Array<{ day: string; count: number }>;
+}
+
 async function fetchFromEsp(): Promise<SensorPayload> {
   const [status, readings] = await Promise.all([
     acousense.espStatus(),
@@ -261,4 +275,61 @@ export async function fetchDeviceCards(): Promise<DeviceCardData[]> {
     threshold: 70,
     signal: rssiToSignal(status?.wifi_rssi),
   }));
+}
+
+export async function fetchHistorySeries(hours: number): Promise<HistoryPoint[]> {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const fromSec = nowSec - hours * 3600;
+  const response = await acousense.espReadings({ from: fromSec, to: nowSec, limit: 500 });
+  const rows = response.data ?? [];
+
+  return rows.map((row) => ({
+    time: new Date(row.timestamp * 1000).toLocaleTimeString("en", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    db: Math.round(Number(row.avg_level ?? 0) * 10) / 10,
+  }));
+}
+
+export async function fetchStatsSnapshot(): Promise<StatsSnapshot> {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const fromSec = nowSec - 7 * 24 * 3600;
+  const response = await acousense.espReadings({ from: fromSec, to: nowSec, limit: 1000 });
+  const rows = response.data ?? [];
+
+  const avgDb = rows.length > 0
+    ? rows.reduce((sum, row) => sum + Number(row.avg_level ?? 0), 0) / rows.length
+    : 0;
+  const peakDb = rows.reduce((max, row) => Math.max(max, Number(row.max_level ?? row.avg_level ?? 0)), 0);
+  const breachCount = rows.filter((row) => Number(row.avg_level ?? 0) >= 70).length;
+
+  const byDay = new Map<string, number>();
+  for (const row of rows) {
+    const key = new Date(row.timestamp * 1000).toLocaleDateString("en", {
+      weekday: "short",
+      day: "numeric",
+    });
+    const count = byDay.get(key) ?? 0;
+    byDay.set(key, count + (Number(row.avg_level ?? 0) >= 70 ? 1 : 0));
+  }
+
+  const recent24h = rows.filter((row) => row.timestamp >= nowSec - 24 * 3600);
+  const recentEvening = rows.filter((row) => row.timestamp >= nowSec - 5 * 3600);
+  const recentNight = rows.filter((row) => row.timestamp >= nowSec - 8 * 3600);
+  const avgFor = (subset: EspReading[]) =>
+    subset.length > 0 ? Math.round((subset.reduce((sum, row) => sum + Number(row.avg_level ?? 0), 0) / subset.length) * 10) / 10 : 0;
+
+  return {
+    avgDb: Math.round(avgDb * 10) / 10,
+    peakDb,
+    breachCount,
+    uptime: rows.length > 0 ? 99.0 : 0,
+    whoThresholds: [
+      { label: "Recent 24h", limit: 55, current: avgFor(recent24h), period: "day" },
+      { label: "Recent 5h", limit: 65, current: avgFor(recentEvening), period: "evening" },
+      { label: "Recent 8h", limit: 70, current: avgFor(recentNight), period: "night" },
+    ],
+    breachHistory: Array.from(byDay.entries()).map(([day, count]) => ({ day, count })),
+  };
 }

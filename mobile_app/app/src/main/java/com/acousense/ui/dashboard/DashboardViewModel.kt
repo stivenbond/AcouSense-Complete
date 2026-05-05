@@ -3,6 +3,8 @@ package com.acousense.ui.dashboard
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.acousense.data.api.EspApiRepository
+import com.acousense.data.api.EspStatusSnapshot
 import com.acousense.data.db.DailySummary
 import com.acousense.data.db.SyncSession
 import com.acousense.domain.BleRepository
@@ -16,6 +18,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 @Immutable
 data class DashboardUiState(
@@ -23,12 +27,14 @@ data class DashboardUiState(
     val todaySummary: DailySummary? = null,
     val isGattLive: Boolean = false,
     val isBluetoothOn: Boolean = true,
+    val espStatus: EspStatusSnapshot = EspStatusSnapshot(),
 )
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     repository: ExposureRepository,
     bleRepository: BleRepository,
+    private val espApiRepository: EspApiRepository,
 ) : ViewModel() {
     private val zoneId = ZoneId.systemDefault()
     private val today = LocalDate.now(zoneId).toString()
@@ -39,7 +45,8 @@ class DashboardViewModel @Inject constructor(
         bleRepository.gattRunning,
         bleRepository.bluetoothEnabled,
         repository.summaryByDate(today),
-    ) { latestSession, recentSessions, isGattLive, isBluetoothOn, storedSummary ->
+        espApiRepository.status,
+    ) { latestSession, recentSessions, isGattLive, isBluetoothOn, storedSummary, espStatus ->
         val startOfDay = LocalDate.parse(today).atStartOfDay(zoneId).toEpochSecond()
         val endOfDay = Instant.now().epochSecond
         val todaySessions = recentSessions.filter { session ->
@@ -54,12 +61,22 @@ class DashboardViewModel @Inject constructor(
             },
             isGattLive = isGattLive,
             isBluetoothOn = isBluetoothOn,
+            espStatus = espStatus,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = DashboardUiState(),
     )
+
+    init {
+        viewModelScope.launch {
+            while (true) {
+                espApiRepository.refresh()
+                delay(15_000)
+            }
+        }
+    }
 }
 
 private fun buildTodaySummary(sessions: List<SyncSession>, date: String): DailySummary {

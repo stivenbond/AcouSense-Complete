@@ -70,7 +70,7 @@ class BleGattService : Service() {
                             periodEnd       = payload.periodEnd,
                             avgLevel        = payload.avgLevel,
                             maxLevel        = payload.maxLevel,
-                            peakCount       = payload.peakCount,
+                            peakCount       = 0,
                             exposureSeconds = payload.exposureSeconds,
                             classification  = payload.classification
                         )

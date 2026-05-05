@@ -7,10 +7,11 @@ object PromptBuilder {
         val hours = summary.totalExposureSeconds / 3600
         val minutes = (summary.totalExposureSeconds % 3600) / 60
         val classification = when (summary.dominantClassification) {
-            1 -> "Low"
+            1 -> "Caution"
             2 -> "Moderate"
             3 -> "High"
-            else -> "None"
+            4 -> "Danger"
+            else -> "Safe"
         }
         return """
             You are a WHO-certified noise exposure health advisor.
