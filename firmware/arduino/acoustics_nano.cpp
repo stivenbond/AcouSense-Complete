@@ -1,5 +1,5 @@
 /**
- * acoustics_nano.ino
+ * acoustics_nano.cpp
  * AcouSense — Arduino Nano V3 Firmware Entry Point
  *
  * Non-blocking cooperative multitasking firmware.
@@ -30,7 +30,7 @@
 #include "spi_slave_manager.h"
 
 // ─── LCD I2C Address ─────────────────────────────────────────────────────────
-// Run firmware/tests/test_lcd.ino to discover the correct address.
+// Run firmware/tests/test_lcd.cpp to discover the correct address.
 // Common values: 0x27 (most modules) or 0x3F (some clones)
 #define LCD_I2C_ADDRESS  0x27
 

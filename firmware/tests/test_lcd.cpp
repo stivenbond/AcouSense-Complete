@@ -1,5 +1,5 @@
 /**
- * test_lcd.ino
+ * test_lcd.cpp
  * AcouSense — Phase 1 Hardware Validation: I2C LCD Display
  *
  * Performs an I2C bus scan to detect the LCD backpack address,

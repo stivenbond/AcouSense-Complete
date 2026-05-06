@@ -161,7 +161,7 @@ uint8_t  pattern_high     = 0x03;
 
 ```
 firmware/arduino/
-├── acoustics_nano.ino        # Entry point: setup() + loop()
+├── acoustics_nano.cpp        # Entry point: setup() + loop()
 ├── sensor_manager.h/.cpp
 ├── lcd_manager.h/.cpp
 ├── buzzer_manager.h/.cpp

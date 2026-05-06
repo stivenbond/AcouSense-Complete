@@ -132,7 +132,7 @@ The level shifter has two sides:
 | `SDA` | Arduino Nano `A4` | I2C data |
 | `SCL` | Arduino Nano `A5` | I2C clock |
 
-> The I2C address of the LCD backpack is either `0x27` or `0x3F` depending on the manufacturer. Run the I2C scanner in `firmware/tests/test_lcd.ino` to detect the correct address before uploading the main firmware.
+> The I2C address of the LCD backpack is either `0x27` or `0x3F` depending on the manufacturer. Run the I2C scanner in `firmware/tests/test_lcd.cpp` to detect the correct address before uploading the main firmware.
 
 ---
 
@@ -244,10 +244,10 @@ Follow this order to minimize errors. Power off completely between sections.
 23. Confirm no wires are bridging adjacent pins incorrectly
 24. Connect 3.3V supply (Rail C) first and measure with multimeter — should read 3.30 ± 0.05V
 25. Connect 5V supply (Rail A) and measure — should read 5.0 ± 0.1V
-26. Connect USB to Arduino Nano → upload `test_lcd.ino` → verify LCD displays text
-27. Upload `test_microphone.ino` → blow on mic → verify ADC values change in Serial Monitor
-28. Upload `test_buzzer.ino` → verify audible tone
-29. Connect USB to ESP32 → upload `test_sdcard.ino` → verify SD mount and file I/O in Serial Monitor
+26. Connect USB to Arduino Nano → upload `test_lcd.cpp` → verify LCD displays text
+27. Upload `test_microphone.cpp` → blow on mic → verify ADC values change in Serial Monitor
+28. Upload `test_buzzer.cpp` → verify audible tone
+29. Connect USB to ESP32 → upload `test_sdcard.cpp` → verify SD mount and file I/O in Serial Monitor
 
 ---
 

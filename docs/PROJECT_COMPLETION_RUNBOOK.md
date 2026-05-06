@@ -37,7 +37,7 @@ Use these exactly in Arduino IDE Library Manager or PlatformIO.
 
 ### Main Arduino Nano firmware
 - Firmware path: `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino`
-- Sketch: `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino\acoustics_nano.ino`
+- Sketch: `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino\acoustics_nano.cpp`
 - Libraries to install:
 
 ```text
@@ -54,7 +54,7 @@ Arduino
 
 ### Main ESP32 firmware
 - Firmware path: `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\esp32`
-- Sketch: `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\esp32\acoustics_esp32.ino`
+- Sketch: `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\esp32\acoustics_esp32.cpp`
 - Libraries to install:
 
 ```text
@@ -79,10 +79,10 @@ Arduino
 - Sketch files:
 
 ```text
-C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_microphone.ino
-C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_lcd.ino
-C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_buzzer.ino
-C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_sdcard.ino
+C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_microphone.cpp
+C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_lcd.cpp
+C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_buzzer.cpp
+C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_sdcard.cpp
 ```
 
 ### Legacy/auxiliary PlatformIO ESP32 firmware
@@ -141,11 +141,11 @@ Run these in order.
 2. Confirm the logic level shifter is present on Arduino Nano SPI lines `D10`, `D11`, `D12`, and `D13` before connecting to ESP32 `GPIO5`, `GPIO23`, `GPIO19`, and `GPIO18`.
 3. Verify the 5V rail under Arduino, LCD, buzzer, and microphone load.
 4. Verify the 3.3V rail under ESP32 and SD-card load.
-5. Run `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_lcd.ino` and record whether your LCD address is `0x27` or `0x3F`.
-6. Update `LCD_I2C_ADDRESS` in `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino\acoustics_nano.ino` if needed.
-7. Run `test_microphone.ino`, `test_buzzer.ino`, and `test_sdcard.ino` and confirm each module behaves correctly on its own.
-8. Install the Arduino Nano libraries listed in section 2, then flash `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino\acoustics_nano.ino`.
-9. Install the ESP32 libraries listed in section 2, set `WIFI_SSID` and `WIFI_PASSWORD` in `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\esp32\acoustics_esp32.ino`, then flash it.
+5. Run `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\tests\test_lcd.cpp` and record whether your LCD address is `0x27` or `0x3F`.
+6. Update `LCD_I2C_ADDRESS` in `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino\acoustics_nano.cpp` if needed.
+7. Run `test_microphone.cpp`, `test_buzzer.cpp`, and `test_sdcard.cpp` and confirm each module behaves correctly on its own.
+8. Install the Arduino Nano libraries listed in section 2, then flash `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\arduino\acoustics_nano.cpp`.
+9. Install the ESP32 libraries listed in section 2, set `WIFI_SSID` and `WIFI_PASSWORD` in `C:\Users\stive\.codex\worktrees\79da\AcouSense\firmware\esp32\acoustics_esp32.cpp`, then flash it.
 10. Boot the ESP32 and verify serial output shows SD mounted, database initialized, Wi-Fi connected, and web server started.
 11. Copy `C:\Users\stive\.codex\worktrees\79da\AcouSense\dashboard\.env.server.example` to a real `.env` file next to `C:\Users\stive\.codex\worktrees\79da\AcouSense\dashboard\docker-compose.server.yml`.
 12. Fill in `PUBLIC_WEB_ORIGIN`, `PUBLIC_AUTH_ORIGIN`, and `PUBLIC_ESP_API_ORIGIN` with the real server and ESP32 addresses.

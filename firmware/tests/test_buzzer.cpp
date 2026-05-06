@@ -1,5 +1,5 @@
 /**
- * test_buzzer.ino
+ * test_buzzer.cpp
  * AcouSense — Phase 1 Hardware Validation: Passive Buzzer
  *
  * Tests the passive buzzer on D9 using tone() / noTone().

@@ -11,11 +11,11 @@
 
 | Pin | Guide | Firmware | Status |
 |-----|-------|----------|--------|
-| A0 | Microphone AO | `test_microphone.ino: #define MIC_PIN A0` | ✅ Match |
-| A4 | LCD SDA | `acoustics_nano.ino: I2C SDA` | ✅ Match |
-| A5 | LCD SCL | `acoustics_nano.ino: I2C SCL` | ✅ Match |
-| D9 | Buzzer + | `test_buzzer.ino: #define BUZZER_PIN 9` | ✅ Match |
-| D10 | SPI SS/CS | `acoustics_nano.ino: D10 mentioned` | ✅ Match |
+| A0 | Microphone AO | `test_microphone.cpp: #define MIC_PIN A0` | ✅ Match |
+| A4 | LCD SDA | `acoustics_nano.cpp: I2C SDA` | ✅ Match |
+| A5 | LCD SCL | `acoustics_nano.cpp: I2C SCL` | ✅ Match |
+| D9 | Buzzer + | `test_buzzer.cpp: #define BUZZER_PIN 9` | ✅ Match |
+| D10 | SPI SS/CS | `acoustics_nano.cpp: D10 mentioned` | ✅ Match |
 | D11 | SPI MOSI | Arduino standard SPI | ✅ Match |
 | D12 | SPI MISO | Arduino standard SPI | ✅ Match |
 | D13 | SPI SCLK | Arduino standard SPI | ✅ Match |
@@ -28,10 +28,10 @@
 | GPIO18 | SPI SCLK (Arduino bus) | `spi_master_manager.h reference` | ✅ Match |
 | GPIO19 | SPI MISO (Arduino bus) | `spi_master_manager.h reference` | ✅ Match |
 | GPIO23 | SPI MOSI (Arduino bus) | `spi_master_manager.h reference` | ✅ Match |
-| GPIO12 | SD MISO | `test_sdcard.ino: #define SD_MISO_PIN 12` | ✅ Match |
-| GPIO13 | SD MOSI | `test_sdcard.ino: #define SD_MOSI_PIN 13` | ✅ Match |
-| GPIO14 | SD SCK | `test_sdcard.ino: #define SD_SCK_PIN 14` | ✅ Match |
-| GPIO15 | SD CS | `test_sdcard.ino: #define SD_CS_PIN 15` | ✅ Match |
+| GPIO12 | SD MISO | `test_sdcard.cpp: #define SD_MISO_PIN 12` | ✅ Match |
+| GPIO13 | SD MOSI | `test_sdcard.cpp: #define SD_MOSI_PIN 13` | ✅ Match |
+| GPIO14 | SD SCK | `test_sdcard.cpp: #define SD_SCK_PIN 14` | ✅ Match |
+| GPIO15 | SD CS | `test_sdcard.cpp: #define SD_CS_PIN 15` | ✅ Match |
 
 ---
 
@@ -54,13 +54,13 @@
 ✅ **100nF & 10µF placement:** Guide specifies exact placement at SD module VCC/GND and 3.3V rail LDO output. Firmware doesn't require this to compile, but the guide correctly identifies this as the #1 SD card failure cause.
 
 ### I2C LCD Flexibility
-✅ **Address detection:** Guide specifies running `test_lcd.ino` first to auto-detect address (0x27 or 0x3F). Firmware confirms this in `lcd_manager.h` and `acoustics_nano.ino` has `#define LCD_I2C_ADDRESS 0x27` (user-adjustable).
+✅ **Address detection:** Guide specifies running `test_lcd.cpp` first to auto-detect address (0x27 or 0x3F). Firmware confirms this in `lcd_manager.h` and `acoustics_nano.cpp` has `#define LCD_I2C_ADDRESS 0x27` (user-adjustable).
 
 ---
 
 ## Test Scripts Guide
 
-### 1. **test_lcd.ino** (Arduino Nano)
+### 1. **test_lcd.cpp** (Arduino Nano)
 **Purpose:** Validate I2C LCD communication and detect correct address.
 
 **What it does:**
@@ -75,7 +75,7 @@
 3. Note the detected address (e.g., `0x27`)
 4. If LCD shows nothing: adjust contrast potentiometer on backpack (small blue trim pot)
 5. If no device found: check SDA (A4) / SCL (A5) wiring
-6. Update `LCD_I2C_ADDRESS` in `acoustics_nano.ino` if address differs from 0x27
+6. Update `LCD_I2C_ADDRESS` in `acoustics_nano.cpp` if address differs from 0x27
 
 **Expected output:**
 ```
@@ -89,7 +89,7 @@ LCD initialized at 0x27
 
 ---
 
-### 2. **test_microphone.ino** (Arduino Nano)
+### 2. **test_microphone.cpp** (Arduino Nano)
 **Purpose:** Validate analog microphone signal and ADC sampling.
 
 **What it does:**
@@ -123,7 +123,7 @@ MIN: 400  MAX: 900  AVG: 650  NORM: 63/100
 
 ---
 
-### 3. **test_buzzer.ino** (Arduino Nano)
+### 3. **test_buzzer.cpp** (Arduino Nano)
 **Purpose:** Validate passive buzzer PWM control and pattern logic.
 
 **What it does:**
@@ -155,7 +155,7 @@ MIN: 400  MAX: 900  AVG: 650  NORM: 63/100
 
 ---
 
-### 4. **test_sdcard.ino** (ESP32)
+### 4. **test_sdcard.cpp** (ESP32)
 **Purpose:** Validate SD card detection, mount, file I/O, and decoupling.
 
 **What it does:**
@@ -227,10 +227,10 @@ SD card not detected. Check:
 ## Recommended Test Sequence (Day 1 Assembly)
 
 1. **Power rails** → Measure 5V and 3.3V with multimeter, then power off
-2. **test_lcd.ino** → Confirm I2C communication before other tests
-3. **test_microphone.ino** → Validate ADC is working
-4. **test_buzzer.ino** → Verify output stage
-5. **test_sdcard.ino** (ESP32)** → Test ESP32 SPI and storage
+2. **test_lcd.cpp** → Confirm I2C communication before other tests
+3. **test_microphone.cpp** → Validate ADC is working
+4. **test_buzzer.cpp** → Verify output stage
+5. **test_sdcard.cpp** (ESP32)** → Test ESP32 SPI and storage
 
 If all tests pass with PASS indicators, proceed to flashing production firmware.
 
@@ -238,6 +238,6 @@ If all tests pass with PASS indicators, proceed to flashing production firmware.
 
 ## Notes for Production Firmware
 
-- **No Serial output:** Production `acoustics_nano.ino` has Serial disabled (uncommenting it may interfere with SPI timing)
-- **LCD address:** If your LCD backpack is at 0x3F instead of 0x27, update `#define LCD_I2C_ADDRESS 0x3F` in `acoustics_nano.ino` before uploading
+- **No Serial output:** Production `acoustics_nano.cpp` has Serial disabled (uncommenting it may interfere with SPI timing)
+- **LCD address:** If your LCD backpack is at 0x3F instead of 0x27, update `#define LCD_I2C_ADDRESS 0x3F` in `acoustics_nano.cpp` before uploading
 - **Cooperative multitasking:** All firmware uses millis()-based scheduling — no `delay()` calls. This ensures responsive interrupt handling for SPI and I2C

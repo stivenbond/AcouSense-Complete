@@ -54,10 +54,10 @@ Run each sketch independently after assembly. Validates one peripheral at a time
 
 | Sketch | What it verifies |
 |---|---|
-| `test_microphone.ino` | 20 Hz ADC, rolling min/max/avg to Serial |
-| `test_lcd.ino` | I2C address scan + 4 rotating display states |
-| `test_buzzer.ino` | All 4 patterns in sequence |
-| `test_sdcard.ino` | Mount → mkdir → write → read → match → delete → report |
+| `test_microphone.cpp` | 20 Hz ADC, rolling min/max/avg to Serial |
+| `test_lcd.cpp` | I2C address scan + 4 rotating display states |
+| `test_buzzer.cpp` | All 4 patterns in sequence |
+| `test_sdcard.cpp` | Mount → mkdir → write → read → match → delete → report |
 
 ---
 
@@ -79,7 +79,7 @@ Run each sketch independently after assembly. Validates one peripheral at a time
 
 ### ESP32 Firmware (`firmware/esp32/`)
 
-**Boot order is strictly dependency-ordered** (see `acoustics_esp32.ino` comments).
+**Boot order is strictly dependency-ordered** (see `acoustics_esp32.cpp` comments).
 
 | Module | Key behaviour |
 |---|---|
@@ -145,22 +145,22 @@ Phase 1 — Hardware
   [ ] Wire per docs/HARDWARE_BUILD_GUIDE.md
   [ ] Install logic level shifter on all 4 SPI lines
   [ ] Install 100µF decoupling cap on SD card Vcc
-  [ ] Run test_microphone.ino → verify Serial output
-  [ ] Run test_lcd.ino → scan I2C address, update LCD_I2C_ADDRESS in acoustics_nano.ino
-  [ ] Run test_buzzer.ino → verify all 4 patterns
-  [ ] Run test_sdcard.ino → verify R/W cycle
+  [ ] Run test_microphone.cpp → verify Serial output
+  [ ] Run test_lcd.cpp → scan I2C address, update LCD_I2C_ADDRESS in acoustics_nano.cpp
+  [ ] Run test_buzzer.cpp → verify all 4 patterns
+  [ ] Run test_sdcard.cpp → verify R/W cycle
 
 Phase 2 — Arduino Flash
   [ ] Copy shared/ headers into firmware/arduino/
   [ ] Install LiquidCrystal_I2C library
-  [ ] Upload acoustics_nano.ino
+  [ ] Upload acoustics_nano.cpp
   [ ] Verify LCD shows "AcouSense v1.0" then live data
 
 Phase 3 — ESP32 Flash
   [ ] Copy shared/ headers into firmware/esp32/
-  [ ] Set WIFI_SSID / WIFI_PASSWORD in acoustics_esp32.ino
+  [ ] Set WIFI_SSID / WIFI_PASSWORD in acoustics_esp32.cpp
   [ ] Install ESPAsyncWebServer, AsyncTCP, ArduinoJson v7, ESP32-sqlite3 libraries
-  [ ] Upload acoustics_esp32.ino
+  [ ] Upload acoustics_esp32.cpp
   [ ] Verify Serial shows SD ✓, DB ✓, SPI config pushed, WiFi connected
 
 Phase 4 — Web Dashboard

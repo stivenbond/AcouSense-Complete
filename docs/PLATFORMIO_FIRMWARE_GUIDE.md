@@ -24,25 +24,25 @@ The sync script automatically copies shared contract headers into the firmware f
 
 - `nano-prod`
   - Flashes the production Arduino Nano firmware
-  - Entry sketch: `firmware/arduino/acoustics_nano.ino`
+  - Entry sketch: `firmware/arduino/acoustics_nano.cpp`
 
 - `nano-test-microphone`
-  - Flashes `firmware/tests/test_microphone.ino`
+  - Flashes `firmware/tests/test_microphone.cpp`
 
 - `nano-test-lcd`
-  - Flashes `firmware/tests/test_lcd.ino`
+  - Flashes `firmware/tests/test_lcd.cpp`
 
 - `nano-test-buzzer`
-  - Flashes `firmware/tests/test_buzzer.ino`
+  - Flashes `firmware/tests/test_buzzer.cpp`
 
 ### ESP32
 
 - `esp32-prod`
   - Flashes the production ESP32 firmware
-  - Entry sketch: `firmware/esp32/acoustics_esp32.ino`
+  - Entry sketch: `firmware/esp32/acoustics_esp32.cpp`
 
 - `esp32-test-sdcard`
-  - Flashes `firmware/tests/test_sdcard.ino`
+  - Flashes `firmware/tests/test_sdcard.cpp`
 
 ## Libraries now managed by PlatformIO
 
@@ -104,12 +104,12 @@ pio run -e esp32-test-sdcard -t upload
 
 1. Flash `nano-test-lcd`
 2. Record the LCD I2C address
-3. Update `firmware/arduino/acoustics_nano.ino` if the address is not `0x27`
+3. Update `firmware/arduino/acoustics_nano.cpp` if the address is not `0x27`
 4. Flash `nano-test-microphone`
 5. Flash `nano-test-buzzer`
 6. Flash `esp32-test-sdcard`
 7. Flash `nano-prod`
-8. Edit Wi-Fi credentials in `firmware/esp32/acoustics_esp32.ino`
+8. Edit Wi-Fi credentials in `firmware/esp32/acoustics_esp32.cpp`
 9. Flash `esp32-prod`
 
 ## What to flash and when

@@ -1,5 +1,5 @@
 /**
- * test_microphone.ino
+ * test_microphone.cpp
  * AcouSense — Phase 1 Hardware Validation: Microphone Sound Sensor
  *
  * Reads the analog output of the sound sensor on A0.

@@ -1,5 +1,5 @@
 /**
- * test_sdcard.ino
+ * test_sdcard.cpp
  * AcouSense — Phase 1 Hardware Validation: SD Card (ESP32)
  *
  * Uploads this sketch to the ESP32 (not the Arduino).

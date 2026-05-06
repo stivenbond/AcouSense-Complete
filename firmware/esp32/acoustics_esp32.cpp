@@ -1,5 +1,5 @@
 /**
- * acoustics_esp32.ino
+ * acoustics_esp32.cpp
  * AcouSense — ESP32-D2 Firmware Entry Point
  *
  * System coordinator. Initializes all subsystems in dependency order,

@@ -219,7 +219,7 @@ struct SyncPayload {
 
 ```
 firmware/esp32/
-├── acoustics_esp32.ino         # Entry point: setup() + loop()
+├── acoustics_esp32.cpp         # Entry point: setup() + loop()
 ├── spi_master_manager.h/.cpp
 ├── sd_card_manager.h/.cpp
 ├── database_manager.h/.cpp

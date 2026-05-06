@@ -15,7 +15,7 @@ AcouSense/
 │
 ├── firmware/
 │   ├── arduino/                      # Arduino Nano V3 firmware
-│   │   ├── acoustics_nano.ino        # Entry point (setup + loop)
+│   │   ├── acoustics_nano.cpp        # Entry point (setup + loop)
 │   │   ├── sensor_manager.h
 │   │   ├── sensor_manager.cpp
 │   │   ├── lcd_manager.h
@@ -29,7 +29,7 @@ AcouSense/
 │   │   └── packet_protocol.h         # Copied from shared/
 │   │
 │   ├── esp32/                        # ESP32-D2 firmware
-│   │   ├── acoustics_esp32.ino       # Entry point (setup + loop)
+│   │   ├── acoustics_esp32.cpp       # Entry point (setup + loop)
 │   │   ├── spi_master_manager.h
 │   │   ├── spi_master_manager.cpp
 │   │   ├── sd_card_manager.h
@@ -47,10 +47,10 @@ AcouSense/
 │   │   └── packet_protocol.h         # Copied from shared/
 │   │
 │   └── tests/                        # Standalone hardware validation sketches (Phase 1)
-│       ├── test_microphone.ino
-│       ├── test_lcd.ino
-│       ├── test_buzzer.ino
-│       └── test_sdcard.ino
+│       ├── test_microphone.cpp
+│       ├── test_lcd.cpp
+│       ├── test_buzzer.cpp
+│       └── test_sdcard.cpp
 │
 ├── dashboard/                        # SvelteKit web dashboard
 │   ├── src/
