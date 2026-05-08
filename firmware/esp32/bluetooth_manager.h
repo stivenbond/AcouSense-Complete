@@ -65,6 +65,8 @@ public:
     static void setLastSyncTs(int64_t ts);
 
 private:
+    friend class AcouScanCallbacks;
+
     static BTManagerStatus _status;
     static int64_t         _lastSyncTs;
 

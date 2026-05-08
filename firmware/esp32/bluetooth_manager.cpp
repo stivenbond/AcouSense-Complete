@@ -71,13 +71,25 @@ class AcouScanCallbacks : public BLEAdvertisedDeviceCallbacks {
 
 static AcouScanCallbacks scanCallbacks;
 static BLEScan* pScan = nullptr;
+static bool scanActive = false;
+
+static void scanCompleteCB(BLEScanResults) {
+    scanActive = false;
+    if (pScan) pScan->clearResults();
+}
+
+static void releaseClient(BLEClient* client) {
+    if (!client) return;
+    if (client->isConnected()) client->disconnect();
+    delete client;
+}
 
 // ─── Private helpers ─────────────────────────────────────────────────────────
 
 void BluetoothManager::_startScan() {
     if (!pScan) return;
     pScan->clearResults();
-    pScan->start(SCAN_WINDOW_SEC, false);  // non-blocking scan
+    scanActive = pScan->start(SCAN_WINDOW_SEC, scanCompleteCB, false);
     _status = BTManagerStatus::SCANNING;
 }
 
@@ -97,8 +109,8 @@ void BluetoothManager::init() {
 }
 
 void BluetoothManager::update() {
-    // Restart scan if it completed (non-blocking mode)
-    if (_status == BTManagerStatus::SCANNING && !pScan->isScanning()) {
+    // Restart scan when the async scan-complete callback marks it finished.
+    if (_status == BTManagerStatus::SCANNING && !scanActive) {
         _startScan();  // Continuous bursts
     }
 }
@@ -136,7 +148,7 @@ bool BluetoothManager::deliverSync(const char* mac, const SyncPayload& payload) 
 
     if (!connected) {
         Serial.println(F("[BT] Connection failed"));
-        BLEDevice::deleteClient(client);
+        releaseClient(client);
         _status = BTManagerStatus::SCANNING;
         return false;
     }
@@ -145,8 +157,7 @@ bool BluetoothManager::deliverSync(const char* mac, const SyncPayload& payload) 
     BLERemoteService* svc = client->getService(BLEUUID(ACOUSENSE_SERVICE_UUID));
     if (!svc) {
         Serial.println(F("[BT] Service not found on remote device"));
-        client->disconnect();
-        BLEDevice::deleteClient(client);
+        releaseClient(client);
         _status = BTManagerStatus::SCANNING;
         return false;
     }
@@ -156,8 +167,7 @@ bool BluetoothManager::deliverSync(const char* mac, const SyncPayload& payload) 
         svc->getCharacteristic(BLEUUID(ACOUSENSE_CHAR_SYNC_PAYLOAD));
     if (!syncChar) {
         Serial.println(F("[BT] Sync characteristic not found"));
-        client->disconnect();
-        BLEDevice::deleteClient(client);
+        releaseClient(client);
         _status = BTManagerStatus::SCANNING;
         return false;
     }
@@ -167,8 +177,7 @@ bool BluetoothManager::deliverSync(const char* mac, const SyncPayload& payload) 
     Serial.printf("[BT] Sync payload delivered to %s\n", mac);
 
     delay(200);  // Brief pause — allow Android to process before disconnect
-    client->disconnect();
-    BLEDevice::deleteClient(client);
+    releaseClient(client);
 
     _status = BTManagerStatus::SCANNING;
     return true;

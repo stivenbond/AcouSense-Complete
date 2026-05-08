@@ -20,6 +20,8 @@
  * An active buzzer will not respond correctly to frequency changes.
  */
 
+#include <Arduino.h>
+
 #define BUZZER_PIN     9
 #define TONE_FREQ   2000    // Hz — standard warning tone
 

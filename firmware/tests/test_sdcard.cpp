@@ -25,6 +25,7 @@
  * Run SD card formatter before this test if mount fails.
  */
 
+#include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
 

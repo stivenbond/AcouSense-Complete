@@ -194,7 +194,7 @@ function mapEspReadingsToPayload(status: EspStatusResponse, readings: EspReading
       { name: "ESP32 API", status: "ok", icon: "server" },
       { name: "Arduino SPI", status: status.arduino === "online" ? "ok" : "error", icon: "memory" },
       { name: "SD Card", status: status.sd_card === "ok" ? "ok" : "error", icon: "storage" },
-      { name: "Bluetooth", status: status.bt_status === "SCANNING" || status.bt_status === "SYNCING" ? "ok" : "warn", icon: "bluetooth" },
+      { name: "Bluetooth", status: ["scanning", "syncing"].includes(status.bt_status.toLowerCase()) ? "ok" : "warn", icon: "bluetooth" },
     ],
     timeSeries: readings
       .slice()

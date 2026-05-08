@@ -15,6 +15,7 @@
  *   Sound sensor VCC → 5V
  *   Sound sensor GND → GND
  */
+#include <Arduino.h>
 
 #define MIC_PIN        A0
 #define SAMPLE_RATE_MS 50     // Sample every 50ms (20 Hz)

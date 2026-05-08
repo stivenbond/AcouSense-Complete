@@ -173,12 +173,12 @@ int DatabaseManager::getReadings(int64_t fromTs, int64_t toTs,
         snprintf(sql, sizeof(sql),
             "SELECT id,timestamp,min_level,max_level,avg_level,alert_level "
             "FROM noise_logs WHERE timestamp >= %lld AND timestamp <= %lld "
-            "ORDER BY timestamp ASC LIMIT %d OFFSET %d;",
+            "ORDER BY timestamp DESC LIMIT %d OFFSET %d;",
             fromTs, toTs, limit > 0 ? limit : 10000, offset);
     } else {
         snprintf(sql, sizeof(sql),
             "SELECT id,timestamp,min_level,max_level,avg_level,alert_level "
-            "FROM noise_logs ORDER BY timestamp ASC LIMIT %d OFFSET %d;",
+            "FROM noise_logs ORDER BY timestamp DESC LIMIT %d OFFSET %d;",
             limit > 0 ? limit : 10000, offset);
     }
 

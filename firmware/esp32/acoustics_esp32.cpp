@@ -41,11 +41,29 @@
 
 #include <WiFi.h>
 #include <Arduino.h>
+#include <string.h>
 
 // ─── Wi-Fi credentials ────────────────────────────────────────────────────────
-// TODO: Move to a credentials.h file excluded from version control
-#define WIFI_SSID     "YOUR_SSID"
-#define WIFI_PASSWORD "YOUR_PASSWORD"
+#if __has_include("credentials.h")
+#include "credentials.h"
+#endif
+
+#ifndef WIFI_SSID
+#define WIFI_SSID     ""
+#endif
+
+#ifndef WIFI_PASSWORD
+#define WIFI_PASSWORD ""
+#endif
+
+#ifndef WIFI_AP_SSID
+#define WIFI_AP_SSID  "AcouSense-ESP32"
+#endif
+
+#ifndef WIFI_AP_PASSWORD
+#define WIFI_AP_PASSWORD "acousense"
+#endif
+
 #define WIFI_TIMEOUT_MS  20000UL  // 20 seconds max connection wait
 
 // ─── NTP ─────────────────────────────────────────────────────────────────────
@@ -55,6 +73,11 @@
 // ─── Wi-Fi Helper ────────────────────────────────────────────────────────────
 
 static bool connectWiFi() {
+    if (strlen(WIFI_SSID) == 0 || strcmp(WIFI_SSID, "YOUR_SSID") == 0) {
+        Serial.println(F("[WiFi] No station credentials configured"));
+        return false;
+    }
+
     Serial.print(F("[WiFi] Connecting to "));
     Serial.println(WIFI_SSID);
     WiFi.mode(WIFI_STA);
@@ -72,6 +95,21 @@ static bool connectWiFi() {
     Serial.println();
     Serial.print(F("[WiFi] Connected — IP: "));
     Serial.println(WiFi.localIP());
+    return true;
+}
+
+static bool startAccessPoint() {
+    WiFi.mode(WIFI_AP);
+    bool ok = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
+    if (!ok) {
+        Serial.println(F("[WiFi] AP start failed"));
+        return false;
+    }
+
+    Serial.print(F("[WiFi] AP started — SSID: "));
+    Serial.println(WIFI_AP_SSID);
+    Serial.print(F("[WiFi] AP IP: "));
+    Serial.println(WiFi.softAPIP());
     return true;
 }
 
@@ -104,6 +142,9 @@ void setup() {
 
     // 5. Wi-Fi
     bool wifiOk = connectWiFi();
+    if (!wifiOk) {
+        wifiOk = startAccessPoint();
+    }
 
     // 6. NTP time sync (best-effort — not critical)
     if (wifiOk) {

@@ -28,6 +28,7 @@
 #include "lcd_manager.h"
 #include "buzzer_manager.h"
 #include "spi_slave_manager.h"
+#include <Arduino.h>
 
 // ─── LCD I2C Address ─────────────────────────────────────────────────────────
 // Run firmware/tests/test_lcd.cpp to discover the correct address.

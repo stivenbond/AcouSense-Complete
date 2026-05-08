@@ -33,6 +33,10 @@ static void sendError(AsyncWebServerRequest* req,
     req->send(code, "application/json", j);
 }
 
+static void handleOptions(AsyncWebServerRequest* req) {
+    req->send(204);
+}
+
 // ─── GET /api/status ─────────────────────────────────────────────────────────
 
 static void handleStatus(AsyncWebServerRequest* req) {
@@ -96,7 +100,8 @@ static void handleReadings(AsyncWebServerRequest* req) {
     doc["offset"] = offset;
     JsonArray arr = doc["data"].to<JsonArray>();
 
-    ReadingsContext ctx { arr, 0 };
+    ReadingsContext ctx;
+    ctx.arr = arr;
     DatabaseManager::getReadings(fromTs, toTs, limit, offset, readingsCB, &ctx);
 
     String out;
@@ -191,8 +196,6 @@ static void handleDevices(AsyncWebServerRequest* req) {
     JsonDocument doc;
     JsonArray arr = doc.to<JsonArray>();
 
-    long long syncWindowStart = (long long)(millis() / 1000UL) - 300; // 5 min ago
-
     DatabaseManager::getDevices([](const BTDevice& dev, void* ud) {
         JsonArray* a = (JsonArray*)ud;
         JsonObject obj = a->add<JsonObject>();
@@ -210,6 +213,10 @@ static void handleDevices(AsyncWebServerRequest* req) {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 void AcouWebServer::init() {
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type,Accept");
+
     // Serve static files from /www on SD card
     server.serveStatic("/", SD, SDCardManager::getWWWDir())
           .setDefaultFile("index.html");
@@ -220,6 +227,11 @@ void AcouWebServer::init() {
     server.on("/api/readings/export", HTTP_GET, handleExport);
     server.on("/api/config",   HTTP_GET,  handleGetConfig);
     server.on("/api/devices",  HTTP_GET,  handleDevices);
+    server.on("/api/status",   HTTP_OPTIONS, handleOptions);
+    server.on("/api/readings", HTTP_OPTIONS, handleOptions);
+    server.on("/api/readings/export", HTTP_OPTIONS, handleOptions);
+    server.on("/api/config",   HTTP_OPTIONS, handleOptions);
+    server.on("/api/devices",  HTTP_OPTIONS, handleOptions);
 
     // POST /api/config — body handler
     server.on("/api/config", HTTP_POST,
@@ -230,6 +242,10 @@ void AcouWebServer::init() {
 
     // 404 fallback — return index.html for SPA client-side routing
     server.onNotFound([](AsyncWebServerRequest* req) {
+        if (req->method() == HTTP_OPTIONS) {
+            req->send(204);
+            return;
+        }
         if (req->url().startsWith("/api/")) {
             req->send(404, "application/json", "{\"error\":\"not found\"}");
         } else {

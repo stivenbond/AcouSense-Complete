@@ -51,6 +51,7 @@ private:
     static void _stageReport();
     static void _loadTX(const uint8_t* data, uint8_t len);
 
+public:
     // ISR-accessible state (volatile)
     static volatile uint8_t  _isrTxBuf[MAX_PACKET_SIZE];
     static volatile uint8_t  _isrTxLen;
@@ -58,6 +59,4 @@ private:
     static volatile uint8_t  _isrRxBuf[MAX_PACKET_SIZE];
     static volatile uint8_t  _isrRxIdx;
     static volatile bool     _isrRxComplete;
-
-    friend void SPI_STC_vect_handler();
 };

@@ -7,6 +7,7 @@
 #include "sensor_manager.h"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <Arduino.h>
 
 #define LCD_REFRESH_MS  500UL  // Refresh every 500ms
 

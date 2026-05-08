@@ -38,7 +38,7 @@ class EspApiRepository @Inject constructor(
             val statusJson = getJsonObject("/api/status")
             val readingsJson = getJsonObject("/api/readings?limit=10")
             val data = readingsJson.optJSONArray("data") ?: JSONArray()
-            val firstReading = if (data.length() > 0) data.optJSONObject(data.length() - 1) else null
+            val firstReading = if (data.length() > 0) data.optJSONObject(0) else null
 
             EspStatusSnapshot(
                 isReachable = true,

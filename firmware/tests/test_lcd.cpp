@@ -23,6 +23,7 @@
 
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <Arduino.h>
 
 // Will be set after I2C scan — default to 0x27
 uint8_t lcdAddress = 0x27;
