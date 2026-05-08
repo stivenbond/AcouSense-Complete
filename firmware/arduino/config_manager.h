@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 struct Config {
-    uint16_t low_threshold;     // Normalized level (0-100) for low alert
+    uint16_t low_threshold;     // Estimated dBA for low alert
     uint16_t medium_threshold;
     uint16_t high_threshold;
     uint8_t  pattern_low;       // Buzzer pattern ID for low severity

@@ -25,16 +25,19 @@ ConnectionState LCDManager::_connState      = ConnectionState::UNKNOWN;
 void LCDManager::_render(uint16_t level, uint8_t alertLevel) {
     if (!_lcd) return;
 
-    // ── Line 1: Level ─────────────────────────────────────────────────────
-    // Format: "Level: 078/100  "
+    // ── Line 1: Estimated dBA ────────────────────────────────────────────
+    // Format: "dBA: 063.4      "
     _lcd->setCursor(0, 0);
-    _lcd->print(F("Level: "));
+    _lcd->print(F("dBA: "));
 
-    // Zero-pad to 3 digits
-    if (level < 10)       _lcd->print(F("00"));
-    else if (level < 100) _lcd->print(F("0"));
-    _lcd->print(level);
-    _lcd->print(F("/100  "));
+    uint16_t whole = level / 10;
+    uint16_t tenths = level % 10;
+    if (whole < 100) _lcd->print(F("0"));
+    if (whole < 10)  _lcd->print(F("0"));
+    _lcd->print(whole);
+    _lcd->print(F("."));
+    _lcd->print(tenths);
+    _lcd->print(F("      "));
 
     // ── Line 2: Alert + Connection ────────────────────────────────────────
     // Format: "ALT:HIGH  CONN  " (16 chars exactly)
@@ -80,7 +83,7 @@ void LCDManager::update() {
     if (now - _lastRefreshTime < LCD_REFRESH_MS) return;
     _lastRefreshTime = now;
 
-    uint16_t level = SensorManager::getCurrentLevel();
+    uint16_t level = SensorManager::getCurrentDbaTenths();
     uint8_t  alert = SensorManager::getCurrentAlertLevel();
     _render(level, alert);
 }

@@ -59,9 +59,9 @@ bool DatabaseManager::_initSchema() {
     if (!_exec(
         "CREATE TABLE IF NOT EXISTS configuration ("
         "  id                INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "  low_threshold     INTEGER NOT NULL DEFAULT 40,"
-        "  medium_threshold  INTEGER NOT NULL DEFAULT 60,"
-        "  high_threshold    INTEGER NOT NULL DEFAULT 80,"
+        "  low_threshold     INTEGER NOT NULL DEFAULT 55,"
+        "  medium_threshold  INTEGER NOT NULL DEFAULT 70,"
+        "  high_threshold    INTEGER NOT NULL DEFAULT 85,"
         "  pattern_low       INTEGER NOT NULL DEFAULT 1,"
         "  pattern_medium    INTEGER NOT NULL DEFAULT 2,"
         "  pattern_high      INTEGER NOT NULL DEFAULT 3"
@@ -101,7 +101,7 @@ bool DatabaseManager::_ensureDefaultConfig() {
             "INSERT INTO configuration "
             "(low_threshold, medium_threshold, high_threshold, "
             " pattern_low, pattern_medium, pattern_high) "
-            "VALUES (40, 60, 80, 1, 2, 3);");
+            "VALUES (55, 70, 85, 1, 2, 3);");
     }
     return true;
 }

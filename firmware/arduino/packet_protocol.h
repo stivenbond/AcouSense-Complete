@@ -38,9 +38,9 @@
  */
 typedef struct __attribute__((packed)) {
     uint32_t timestamp;     // Seconds since Arduino boot (millis()/1000)
-    uint16_t min_level;     // Minimum normalized sound level (0-100)
-    uint16_t max_level;     // Maximum normalized sound level (0-100)
-    uint16_t avg_level;     // Average normalized sound level (0-100)
+    uint16_t min_level;     // Minimum estimated dBA
+    uint16_t max_level;     // Maximum estimated dBA
+    uint16_t avg_level;     // Average estimated dBA
     uint8_t  alert_level;   // 0=none, 1=low, 2=medium, 3=high
 } AudioReportPayload;
 
@@ -49,9 +49,9 @@ typedef struct __attribute__((packed)) {
  * Total payload size: 9 bytes
  */
 typedef struct __attribute__((packed)) {
-    uint16_t low_threshold;     // ADC normalized level for low alert
-    uint16_t medium_threshold;  // ADC normalized level for medium alert
-    uint16_t high_threshold;    // ADC normalized level for high alert
+    uint16_t low_threshold;     // Estimated dBA for low alert
+    uint16_t medium_threshold;  // Estimated dBA for medium alert
+    uint16_t high_threshold;    // Estimated dBA for high alert
     uint8_t  pattern_low;       // Buzzer pattern ID for low severity
     uint8_t  pattern_medium;    // Buzzer pattern ID for medium severity
     uint8_t  pattern_high;      // Buzzer pattern ID for high severity

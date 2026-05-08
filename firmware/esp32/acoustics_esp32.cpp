@@ -80,7 +80,7 @@ static bool connectWiFi() {
 
     Serial.print(F("[WiFi] Connecting to "));
     Serial.println(WIFI_SSID);
-    WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_AP_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     unsigned long start = millis();
@@ -99,7 +99,7 @@ static bool connectWiFi() {
 }
 
 static bool startAccessPoint() {
-    WiFi.mode(WIFI_AP);
+    WiFi.mode(WIFI_AP_STA);
     bool ok = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
     if (!ok) {
         Serial.println(F("[WiFi] AP start failed"));
@@ -141,16 +141,18 @@ void setup() {
     SPIMasterManager::init();
 
     // 5. Wi-Fi
-    bool wifiOk = connectWiFi();
-    if (!wifiOk) {
-        wifiOk = startAccessPoint();
-    }
+    // Always expose a local setup/dashboard network. Station mode is optional.
+    bool apOk = startAccessPoint();
+    bool staOk = connectWiFi();
+    bool wifiOk = apOk || staOk;
 
     // 6. NTP time sync (best-effort — not critical)
-    if (wifiOk) {
+    if (staOk) {
         configTzTime(NTP_TZ, NTP_SERVER);
         Serial.println(F("[NTP] Time sync requested"));
         delay(1000);  // Brief wait for initial NTP reply
+    } else {
+        Serial.println(F("[NTP] Skipped (station WiFi not connected)"));
     }
 
     // 7. Web Server (requires Wi-Fi + DB)

@@ -24,7 +24,7 @@ void ESP32ConfigManager::init() {
         Serial.println(F("[Config] Loaded from DB"));
     } else {
         // Fallback to firmware defaults
-        _config = { 40, 60, 80, 1, 2, 3 };
+        _config = { 55, 70, 85, 1, 2, 3 };
         _loaded = false;
         Serial.println(F("[Config] DB load failed — using defaults"));
     }

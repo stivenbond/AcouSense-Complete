@@ -20,7 +20,7 @@
 #define EXPOSURE_HIGH       3   // 75 <= avg_noise < 90
 #define EXPOSURE_DANGER     4   // avg_noise >= 90
 
-// ─── Classification Boundaries (normalized 0-100 scale) ─────────────────────
+// ─── Classification Boundaries (estimated dBA) ──────────────────────────────
 
 #define EXPOSURE_THRESHOLD_CAUTION    40
 #define EXPOSURE_THRESHOLD_MODERATE   60
@@ -30,7 +30,7 @@
 // ─── Classifier Function ────────────────────────────────────────────────────
 
 /**
- * Returns the exposure class ID (0-4) for a given avg_noise value (0-100).
+ * Returns the exposure class ID (0-4) for a given estimated dBA value.
  */
 static inline uint8_t classifyExposure(uint16_t avg_noise) {
     if (avg_noise < EXPOSURE_THRESHOLD_CAUTION)  return EXPOSURE_SAFE;

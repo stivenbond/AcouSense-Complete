@@ -13,9 +13,9 @@ Config ConfigManager::_config;
 
 void ConfigManager::init() {
     // Firmware defaults — will be overwritten on first SPI config packet
-    _config.low_threshold    = 40;
-    _config.medium_threshold = 60;
-    _config.high_threshold   = 80;
+    _config.low_threshold    = 55;
+    _config.medium_threshold = 70;
+    _config.high_threshold   = 85;
     _config.pattern_low      = 0x01;
     _config.pattern_medium   = 0x02;
     _config.pattern_high     = 0x03;

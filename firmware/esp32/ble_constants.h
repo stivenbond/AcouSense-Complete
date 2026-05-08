@@ -47,8 +47,8 @@ typedef struct __attribute__((packed)) {
     uint8_t  user_id[32];       // user_identifier, null-padded ASCII string
     uint32_t ts_start;          // Period start (Unix timestamp, seconds)
     uint32_t ts_end;            // Period end (Unix timestamp, seconds)
-    uint16_t avg_noise;         // Average normalized noise level (0-100)
-    uint16_t peak_noise;        // Peak normalized noise level (0-100)
+    uint16_t avg_noise;         // Average estimated dBA
+    uint16_t peak_noise;        // Peak estimated dBA
     uint8_t  exposure_class;    // 0=safe, 1=caution, 2=moderate, 3=high, 4=danger
     uint8_t  reserved;          // Align to even byte boundary
 } SyncPayload;

@@ -166,9 +166,9 @@ static void handlePostConfig(AsyncWebServerRequest* req, uint8_t* data,
     }
 
     ESPConfig cfg;
-    cfg.low_threshold    = doc["low_threshold"]    | 40;
-    cfg.medium_threshold = doc["medium_threshold"] | 60;
-    cfg.high_threshold   = doc["high_threshold"]   | 80;
+    cfg.low_threshold    = doc["low_threshold"]    | 55;
+    cfg.medium_threshold = doc["medium_threshold"] | 70;
+    cfg.high_threshold   = doc["high_threshold"]   | 85;
     cfg.pattern_low      = doc["pattern_low"]      | 1;
     cfg.pattern_medium   = doc["pattern_medium"]   | 2;
     cfg.pattern_high     = doc["pattern_high"]     | 3;
@@ -255,6 +255,12 @@ void AcouWebServer::init() {
 
     server.begin();
     Serial.println(F("[Web] Server started on port 80"));
-    Serial.print(F("[Web] Dashboard: http://"));
-    Serial.println(WiFi.localIP());
+    if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+        Serial.print(F("[Web] AP dashboard: http://"));
+        Serial.println(WiFi.softAPIP());
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.print(F("[Web] LAN dashboard: http://"));
+        Serial.println(WiFi.localIP());
+    }
 }
