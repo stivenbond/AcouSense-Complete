@@ -32,6 +32,9 @@ int             BluetoothManager::_presenceCount = 0;
 
 class AcouScanCallbacks : public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) override {
+        // If DB is not ready, we can't verify or store anything, so skip to save resources.
+        if (!DatabaseManager::isReady()) return;
+
         // Only interested in devices advertising our AcouSense service UUID
         if (!advertisedDevice.haveServiceUUID()) return;
         if (!advertisedDevice.isAdvertisingService(
@@ -73,9 +76,9 @@ static AcouScanCallbacks scanCallbacks;
 static BLEScan* pScan = nullptr;
 static bool scanActive = false;
 
-static void scanCompleteCB(BLEScanResults) {
+static void scanCompleteCB(BLEScanResults results) {
     scanActive = false;
-    if (pScan) pScan->clearResults();
+    // Do NOT clear results here; it is unsafe to do so from within a callback.
 }
 
 static void releaseClient(BLEClient* client) {
@@ -88,9 +91,14 @@ static void releaseClient(BLEClient* client) {
 
 void BluetoothManager::_startScan() {
     if (!pScan) return;
-    pScan->clearResults();
-    scanActive = pScan->start(SCAN_WINDOW_SEC, scanCompleteCB, false);
-    _status = BTManagerStatus::SCANNING;
+    pScan->clearResults(); // Safe to clear before starting a new scan
+    if (pScan->start(SCAN_WINDOW_SEC, scanCompleteCB, false)) {
+        scanActive = true;
+        _status = BTManagerStatus::SCANNING;
+    } else {
+        scanActive = false;
+        Serial.println(F("[BT] Failed to start scan"));
+    }
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────

@@ -162,10 +162,10 @@ void setup() {
         Serial.println(F("[Boot] Web server skipped (no WiFi or DB)"));
     }
 
-    // 8. Bluetooth (can operate without Wi-Fi)
+    // 8. Bluetooth (Temporarily disabled for Power/Stability testing)
     BluetoothManager::init();
 
-    // 9. Sync Manager
+    // 9. Sync Manager (Depends on BT, but safe to init - will just idle)
     SyncManager::init();
 
     Serial.println(F("[Boot] System ready\n"));

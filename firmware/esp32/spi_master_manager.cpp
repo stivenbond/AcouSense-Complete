@@ -17,7 +17,7 @@
 #define ARD_MOSI   23
 #define ARD_CS      5
 
-#define SPI_FREQ        500000UL               // 500 kHz
+#define SPI_FREQ        100000UL               // 100 kHz (Stability Mode)
 #define POLL_INTERVAL   10000UL                // 10 seconds
 #define ACK_TIMEOUT_MS    500UL
 #define MAX_RETRIES           3
@@ -62,7 +62,7 @@ bool SPIMasterManager::_poll() {
     uint8_t txPkt[HEARTBEAT_PACKET_SIZE];
     buildPacket(PACKET_TYPE_HEARTBEAT, nullptr, 0, txPkt);
 
-    uint8_t rxBuf[AUDIO_REPORT_PACKET_SIZE + 4] = {0};
+    uint8_t rxBuf[MAX_PACKET_SIZE] = {0};
     uint8_t rxLen = 0;
     _transaction(txPkt, HEARTBEAT_PACKET_SIZE, rxBuf, &rxLen);
 
@@ -101,7 +101,7 @@ bool SPIMasterManager::_poll() {
 bool SPIMasterManager::_sendAndACK(const uint8_t* packet, uint8_t len,
                                     uint8_t expectedAckType) {
     for (uint8_t attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        uint8_t rxBuf[ACK_PACKET_SIZE + 4] = {0};
+        uint8_t rxBuf[MAX_PACKET_SIZE] = {0};
         uint8_t rxLen = 0;
         _transaction(packet, len, rxBuf, &rxLen);
 
