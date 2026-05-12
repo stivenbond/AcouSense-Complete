@@ -110,9 +110,8 @@ float processFrame() {
         float freq = (float)i * SAMPLE_RATE / FFT_SIZE;
         float mag = vReal[i] * 2.0f / FFT_SIZE;
         float magDB = 20.0f * log10(mag + 1e-12f) + MIC_REF_DB - 20.0f * log10(MIC_REF_AMPL) + MIC_OFFSET_DB;
-        float aWeigthCorrection = aWeightForFreq(freq);
-        float aDB = magDB + aWeigthCorrection;
-        energyLinear += pow(10.0f, aDB / 10.0f);
+        // For dB(Z), we do not apply A-weighting (flat response)
+        energyLinear += pow(10.0f, magDB / 10.0f);
     }
     
     leqAccumulator += energyLinear;
@@ -140,7 +139,7 @@ void publishLeq() {
     StaticJsonDocument<256> doc;
     doc["sensor_id"] = SENSOR_ID;
     doc["ts"] = millis();
-    doc["leq_dba"] = round(leq * 10.0) / 10.0;
+    doc["leq_dbz"] = round(leq * 10.0) / 10.0;
     doc["lat"] = lat;
     doc["lng"] = lng;
     doc["gps_valid"] = gpsValid;

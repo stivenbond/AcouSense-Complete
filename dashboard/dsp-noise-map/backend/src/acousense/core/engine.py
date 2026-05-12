@@ -175,7 +175,7 @@ def ingest_sensor_readings(
             continue
         weight = 2.0 if age < 30 else 1.0
         x, y = latlon_to_cartesian(r["lat"], r["lng"], origin_lat, origin_lon)
-        power = (10.0 ** (r["leq_dba"] / 10.0)) * (P_REF**2) * weight
+        power = (10.0 ** (r["leq_dbz"] / 10.0)) * (P_REF**2) * weight
         pts.append([x, y, power])
     return np.array(pts) if pts else np.zeros((0, 3))
 
@@ -373,7 +373,7 @@ def generate_realtime_heatmap(
         sensor_xy = np.array(
             [latlon_to_cartesian(r["lat"], r["lng"], olat, olon) for r in recent]
         )
-        sensor_db = np.array([r["leq_dba"] for r in recent])
+        sensor_db = np.array([r["leq_dbz"] for r in recent])
         interp_grid = adaptive_interpolate(sensor_xy, sensor_db, X, Y)
         # 60% physical + 40% statistical blend
         db_grid = 0.6 * db_grid + 0.4 * interp_grid
@@ -383,7 +383,7 @@ def generate_realtime_heatmap(
         sensor_xy = np.array(
             [latlon_to_cartesian(r["lat"], r["lng"], olat, olon) for r in recent]
         )
-        sensor_db = np.array([r["leq_dba"] for r in recent])
+        sensor_db = np.array([r["leq_dbz"] for r in recent])
         db_grid = sensor_correction_pass(db_grid, sensor_xy, sensor_db, X, Y, xs, ys)
 
     # Step 5 — Final Gaussian smoothing

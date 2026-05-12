@@ -10,7 +10,7 @@
 #include "database_manager.h"
 #include "config_manager.h"
 #include "sd_card_manager.h"
-#include "spi_master_manager.h"
+#include "uart_manager.h"
 #include "bluetooth_manager.h"
 #include <ESPAsyncWebServer.h>
 #include <SD.h>
@@ -42,15 +42,15 @@ static void handleOptions(AsyncWebServerRequest* req) {
 static void handleStatus(AsyncWebServerRequest* req) {
     JsonDocument doc;
 
-    doc["arduino"] = (SPIMasterManager::getStatus() == ArduinoStatus::ONLINE)
+    doc["arduino"] = (UARTManager::getStatus() == ArduinoStatus::ONLINE)
                      ? "online" : "offline";
     doc["sd_card"] = SDCardManager::isMounted() ? "ok" : "error";
     doc["wifi_rssi"] = WiFi.RSSI();
     doc["bt_status"] = BluetoothManager::getStatusString();
     doc["last_sync_ts"] = (long long)BluetoothManager::getLastSyncTs();
 
-    if (SPIMasterManager::getLastReportTime() > 0) {
-        AudioReportPayload r = SPIMasterManager::getLastReport();
+    if (UARTManager::getLastReportTime() > 0) {
+        AudioReportPayload r = UARTManager::getLastReport();
         JsonObject lr = doc["last_reading"].to<JsonObject>();
         lr["avg_level"]   = r.avg_level;
         lr["max_level"]   = r.max_level;
@@ -184,7 +184,7 @@ static void handlePostConfig(AsyncWebServerRequest* req, uint8_t* data,
 
     JsonDocument resp;
     resp["success"]       = saved;
-    resp["arduino_synced"] = (SPIMasterManager::getStatus() == ArduinoStatus::ONLINE);
+    resp["arduino_synced"] = (UARTManager::getStatus() == ArduinoStatus::ONLINE);
     String out;
     serializeJson(resp, out);
     sendJSON(req, out);

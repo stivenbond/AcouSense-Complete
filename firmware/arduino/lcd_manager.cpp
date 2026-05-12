@@ -25,10 +25,10 @@ ConnectionState LCDManager::_connState      = ConnectionState::UNKNOWN;
 void LCDManager::_render(uint16_t level, uint8_t alertLevel) {
     if (!_lcd) return;
 
-    // ── Line 1: Estimated dBA ────────────────────────────────────────────
-    // Format: "dBA: 063.4      "
+    // ── Line 1: Estimated dBZ ────────────────────────────────────────────
+    // Format: "dBZ: 063.4      "
     _lcd->setCursor(0, 0);
-    _lcd->print(F("dBA: "));
+    _lcd->print(F("dBZ: "));
 
     uint16_t whole = level / 10;
     uint16_t tenths = level % 10;
@@ -83,7 +83,7 @@ void LCDManager::update() {
     if (now - _lastRefreshTime < LCD_REFRESH_MS) return;
     _lastRefreshTime = now;
 
-    uint16_t level = SensorManager::getCurrentDbaTenths();
+    uint16_t level = SensorManager::getCurrentDbzTenths();
     uint8_t  alert = SensorManager::getCurrentAlertLevel();
     _render(level, alert);
 }

@@ -90,7 +90,7 @@ def init_db(db_path: str = DB_PATH) -> None:
                 id        INTEGER PRIMARY KEY AUTOINCREMENT,
                 sensor_id TEXT    NOT NULL,
                 ts        INTEGER NOT NULL,
-                leq_dba   REAL    NOT NULL,
+                leq_dbz   REAL    NOT NULL,
                 lat       REAL    NOT NULL,
                 lng       REAL    NOT NULL,
                 gps_valid INTEGER DEFAULT 0,
@@ -163,7 +163,7 @@ def insert_reading(payload: dict[str, Any], db_path: str = DB_PATH) -> bool:
 
     All values bound via parameterised queries — no string formatting.
     """
-    required: set[str] = {"sensor_id", "ts", "leq_dba", "lat", "lng"}
+    required: set[str] = {"sensor_id", "ts", "leq_dbz", "lat", "lng"}
     if not required.issubset(payload.keys()):
         return False
 
@@ -180,13 +180,13 @@ def insert_reading(payload: dict[str, Any], db_path: str = DB_PATH) -> bool:
     with get_db(db_path) as conn:
         conn.execute(
             """
-            INSERT INTO readings (sensor_id, ts, leq_dba, lat, lng, gps_valid)
+            INSERT INTO readings (sensor_id, ts, leq_dbz, lat, lng, gps_valid)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
                 stored_sensor_id,
                 int(payload["ts"]),
-                float(payload["leq_dba"]),
+                float(payload["leq_dbz"]),
                 float(payload["lat"]),
                 float(payload["lng"]),
                 int(payload.get("gps_valid", 0)),
@@ -252,7 +252,7 @@ def seed_mock_readings(
     with get_db(db_path) as conn:
         conn.executemany(
             """
-            INSERT INTO readings (sensor_id, ts, leq_dba, lat, lng, gps_valid)
+            INSERT INTO readings (sensor_id, ts, leq_dbz, lat, lng, gps_valid)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             rows,
@@ -278,7 +278,7 @@ def fetch_recent_readings(
                 sensor_id,
                 AVG(lat)                                          AS lat,
                 AVG(lng)                                          AS lng,
-                10 * LOG10(AVG(POWER(10, leq_dba / 10.0)))       AS leq_dba,
+                10 * LOG10(AVG(POWER(10, leq_dbz / 10.0)))       AS leq_dbz,
                 MAX(ts)                                           AS ts
             FROM readings
             WHERE ts >= ?
@@ -286,7 +286,7 @@ def fetch_recent_readings(
             """,
             (since_ms,),
         ).fetchall()
-    return [dict(r) for r in rows if r["leq_dba"] is not None]
+    return [dict(r) for r in rows if r["leq_dbz"] is not None]
 
 
 def fetch_all_readings(
@@ -333,18 +333,18 @@ def fetch_stats(db_path: str = DB_PATH) -> dict[str, Any]:
         row = conn.execute(
             """
             SELECT
-                MIN(leq_dba)                                        AS min_dba,
-                MAX(leq_dba)                                        AS max_dba,
-                10 * LOG10(AVG(POWER(10, leq_dba / 10.0)))          AS avg_dba
+                MIN(leq_dbz)                                        AS min_dbz,
+                MAX(leq_dbz)                                        AS max_dbz,
+                10 * LOG10(AVG(POWER(10, leq_dbz / 10.0)))          AS avg_dbz
             FROM readings
             """
         ).fetchone()
     return {
         "sensor_count": sensor_count,
         "reading_count": reading_count,
-        "min_dba": round(row["min_dba"], 1) if row["min_dba"] is not None else 0.0,
-        "max_dba": round(row["max_dba"], 1) if row["max_dba"] is not None else 0.0,
-        "avg_dba": round(row["avg_dba"], 1) if row["avg_dba"] is not None else 0.0,
+        "min_dbz": round(row["min_dbz"], 1) if row["min_dbz"] is not None else 0.0,
+        "max_dbz": round(row["max_dbz"], 1) if row["max_dbz"] is not None else 0.0,
+        "avg_dbz": round(row["avg_dbz"], 1) if row["avg_dbz"] is not None else 0.0,
     }
 
 
@@ -360,7 +360,7 @@ def fetch_exposure_metrics(
     with get_db(db_path) as conn:
         minute_rows = conn.execute(
             """
-            SELECT (ts / 60000) AS minute_bucket, MAX(leq_dba) AS max_dba
+            SELECT (ts / 60000) AS minute_bucket, MAX(leq_dbz) AS max_dbz
             FROM readings
             WHERE ts >= ?
             GROUP BY minute_bucket
@@ -369,7 +369,7 @@ def fetch_exposure_metrics(
         ).fetchall()
         avg_row = conn.execute(
             """
-            SELECT 10 * LOG10(AVG(POWER(10, leq_dba / 10.0))) AS true_avg
+            SELECT 10 * LOG10(AVG(POWER(10, leq_dbz / 10.0))) AS true_avg
             FROM readings WHERE ts >= ?
             """,
             (since_ms,),
@@ -377,14 +377,14 @@ def fetch_exposure_metrics(
 
     green = yellow = red = 0
     for row in minute_rows:
-        if row["max_dba"] < 65:
+        if row["max_dbz"] < 65:
             green += 1
-        elif row["max_dba"] < 85:
+        elif row["max_dbz"] < 85:
             yellow += 1
         else:
             red += 1
 
-    avg_dba = avg_row["true_avg"] if avg_row["true_avg"] is not None else 0.0
+    avg_dbz = avg_row["true_avg"] if avg_row["true_avg"] is not None else 0.0
     return {
         "days": days,
         "metrics": {
@@ -392,6 +392,6 @@ def fetch_exposure_metrics(
             "yellow_minutes": yellow,
             "red_minutes": red,
             "total_evaluated_minutes": len(minute_rows),
-            "average_dba": round(avg_dba, 1),
+            "average_dbz": round(avg_dbz, 1),
         },
     }

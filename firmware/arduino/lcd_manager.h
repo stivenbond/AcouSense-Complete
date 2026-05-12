@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 /**
- * Connection states reported by SPISlaveManager.
+ * Connection states reported by UARTManager.
  * LCDManager reads this to show ESP32 link health.
  */
 enum class ConnectionState : uint8_t {

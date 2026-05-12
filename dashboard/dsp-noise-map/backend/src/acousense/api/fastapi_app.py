@@ -92,9 +92,9 @@ async def audit_middleware(request: Request, call_next: Any) -> Response:
 # --- Models ---
 class SensorStats(BaseModel):
     total_samples: int
-    avg_dba: float | None
-    min_dba: float | None
-    max_dba: float | None
+    avg_dbz: float | None
+    min_dbz: float | None
+    max_dbz: float | None
 
 
 # --- Endpoints ---

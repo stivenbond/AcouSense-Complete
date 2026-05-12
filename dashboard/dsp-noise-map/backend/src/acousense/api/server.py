@@ -186,7 +186,7 @@ def api_heatmap() -> Response:
                 {
                     "lat": round(float(lats[i]), 6),
                     "lng": round(float(lons[j]), 6),
-                    "leq_dba": round(float(db_grid[i, j]), 2),
+                    "leq_dbz": round(float(db_grid[i, j]), 2),
                 }
             )
 

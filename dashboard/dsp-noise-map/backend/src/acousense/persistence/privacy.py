@@ -13,7 +13,7 @@ Principles implemented
    needed for acoustic heatmaps.
 
 2. **Differential Privacy noise** (Laplace mechanism)
-   A calibrated Laplace-distributed noise term is added to aggregate dBa
+   A calibrated Laplace-distributed noise term is added to aggregate dbz
    values returned by the API.  With ε = 0.5 and sensitivity = 1 dB,
    individual readings cannot be inferred from the published aggregate,
    while the urban noise map retains statistical utility at the
@@ -104,27 +104,27 @@ def _laplace_noise(sensitivity: float, epsilon: float) -> float:
 
 
 def add_dp_noise(
-    dba_value: float,
+    dbz_value: float,
     epsilon: float = 0.5,
     sensitivity: float = 1.0,
 ) -> float:
     """
-    Apply the Laplace differential privacy mechanism to a dBa measurement.
+    Apply the Laplace differential privacy mechanism to a dbz measurement.
 
     With the default parameters (ε=0.5, Δf=1 dB) the expected noise magnitude
     is ±2 dB — within the ±3 dB measurement uncertainty of consumer MEMS
     microphones, so the map retains full practical utility.
 
     Args:
-        dba_value:   The aggregate sound level in dB(A).
+        dbz_value:   The aggregate sound level in dB(Z).
         epsilon:     Privacy budget.  Default 0.5 (moderate privacy).
         sensitivity: The maximum influence of a single reading on the
                      aggregated output.  Default 1.0 dB.
 
     Returns:
-        dba_value + Laplace noise, clamped to [0.0, 140.0] dB.
+        dbz_value + Laplace noise, clamped to [0.0, 140.0] dB.
     """
-    noisy = dba_value + _laplace_noise(sensitivity, epsilon)
+    noisy = dbz_value + _laplace_noise(sensitivity, epsilon)
     return round(max(0.0, min(140.0, noisy)), 1)
 
 
@@ -144,13 +144,13 @@ def sanitize_reading(
 
     Transforms applied:
       • Coordinate generalisation (lat/lng snapped to 100 m grid)
-      • dBa differential privacy noise
+      • dbz differential privacy noise
 
     The ``sensor_id`` is encrypted at the database layer via
     ``src.security.secrets.encrypt_value`` — not handled here.
 
     Args:
-        payload:      Raw MQTT payload dict with lat, lng, leq_dba keys.
+        payload:      Raw MQTT payload dict with lat, lng, leq_dbz keys.
         coord_cell_m: Grid cell size for coordinate generalisation.
         dp_epsilon:   Differential privacy budget.
 
@@ -164,7 +164,7 @@ def sanitize_reading(
             float(out["lat"]), float(out["lng"]), cell_m=coord_cell_m
         )
 
-    if "leq_dba" in out:
-        out["leq_dba"] = add_dp_noise(float(out["leq_dba"]), epsilon=dp_epsilon)
+    if "leq_dbz" in out:
+        out["leq_dbz"] = add_dp_noise(float(out["leq_dbz"]), epsilon=dp_epsilon)
 
     return out

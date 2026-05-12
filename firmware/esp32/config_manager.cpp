@@ -5,7 +5,7 @@
 
 #include "config_manager.h"
 #include "database_manager.h"
-#include "spi_master_manager.h"
+#include "uart_manager.h"
 #include <Arduino.h>
 
 ESPConfig ESP32ConfigManager::_config = {};
@@ -50,8 +50,8 @@ bool ESP32ConfigManager::apply(const ESPConfig& cfg) {
         Serial.println(F("[Config] Warning: DB save failed"));
     }
 
-    // Push new config to Arduino via SPI
-    SPIMasterManager::pushConfig(cfg);
+    // Push new config to Arduino via UART
+    UARTManager::pushConfig(cfg);
 
     return saved;
 }

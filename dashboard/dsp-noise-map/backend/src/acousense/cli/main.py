@@ -102,13 +102,13 @@ def start_engine_loop() -> None:
                     rows = conn.execute(
                         """
                         SELECT sensor_id, AVG(lat) as lat, AVG(lng) as lng,
-                               10 * LOG10(AVG(POWER(10, leq_dba / 10.0))) AS leq_dba,
+                               10 * LOG10(AVG(POWER(10, leq_dbz / 10.0))) AS leq_dbz,
                                MAX(ts) as ts
                         FROM readings WHERE ts >= ? GROUP BY sensor_id
                     """,
                         (since_ts,),
                     ).fetchall()
-                readings = [dict(r) for r in rows if r["leq_dba"] is not None]
+                readings = [dict(r) for r in rows if r["leq_dbz"] is not None]
 
                 if not readings:
                     time.sleep(ENGINE_INTERVAL)

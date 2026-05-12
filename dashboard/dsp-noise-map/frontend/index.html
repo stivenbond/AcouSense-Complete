@@ -217,15 +217,15 @@
         <div class="zone-legend">
             <div class="zone zone-danger">
                 <div class="zone-dot"></div>
-                <div class="zone-text"><strong>> 85 dB(A)</strong><span>Dangerous · Permanent hearing damage</span></div>
+                <div class="zone-text"><strong>> 85 dB(Z)</strong><span>Dangerous · Permanent hearing damage</span></div>
             </div>
             <div class="zone zone-caution">
                 <div class="zone-dot"></div>
-                <div class="zone-text"><strong>70 – 85 dB(A)</strong><span>Cautionary · Tiring; short exposure only</span></div>
+                <div class="zone-text"><strong>70 – 85 dB(Z)</strong><span>Cautionary · Tiring; short exposure only</span></div>
             </div>
             <div class="zone zone-safe">
                 <div class="zone-dot"></div>
-                <div class="zone-text"><strong>&lt; 70 dB(A)</strong><span>Safe · Comfortable for long-term use</span></div>
+                <div class="zone-text"><strong>&lt; 70 dB(Z)</strong><span>Safe · Comfortable for long-term use</span></div>
             </div>
         </div>
 
@@ -281,15 +281,15 @@
         let heatLayer = null;
         let markerLayer = L.layerGroup().addTo(map);
 
-        function zoneColor(dba) {
-            if (dba >= 85) return getComputedStyle(document.documentElement).getPropertyValue('--danger').trim();
-            if (dba >= 70) return getComputedStyle(document.documentElement).getPropertyValue('--caution').trim();
+        function zoneColor(dbz) {
+            if (dbz >= 85) return getComputedStyle(document.documentElement).getPropertyValue('--danger').trim();
+            if (dbz >= 70) return getComputedStyle(document.documentElement).getPropertyValue('--caution').trim();
             return getComputedStyle(document.documentElement).getPropertyValue('--safe').trim();
         }
 
-        function zoneLabel(dba) {
-            if (dba >= 85) return "DANGER";
-            if (dba >= 70) return "CAUTION";
+        function zoneLabel(dbz) {
+            if (dbz >= 85) return "DANGER";
+            if (dbz >= 70) return "CAUTION";
             return "SAFE";
         }
 
@@ -300,8 +300,8 @@
                 const data = await res.json();
                 document.getElementById('stat-sensors').innerText = data.sensor_count;
                 document.getElementById('stat-readings').innerText = data.reading_count > 1000 ? (data.reading_count/1000).toFixed(1) + 'k' : data.reading_count;
-                document.getElementById('stat-min').innerText = typeof data.min_dba === 'number' ? data.min_dba.toFixed(1) : "—";
-                document.getElementById('stat-max').innerText = typeof data.max_dba === 'number' ? data.max_dba.toFixed(1) : "—";
+                document.getElementById('stat-min').innerText = typeof data.min_dbz === 'number' ? data.min_dbz.toFixed(1) : "—";
+                document.getElementById('stat-max').innerText = typeof data.max_dbz === 'number' ? data.max_dbz.toFixed(1) : "—";
             } catch (e) {
                 console.warn("Failed fetching stats");
                 throw e; // propagate for fallback
@@ -317,13 +317,13 @@
             list.innerHTML = "";
             
             data.forEach(sensor => {
-                const color = zoneColor(sensor.leq_dba);
+                const color = zoneColor(sensor.leq_dbz);
                 const el = document.createElement('div');
                 el.className = 'sensor-item';
                 el.innerHTML = `
                     <div class="pulsing-dot" style="background: ${color}; box-shadow: 0 0 8px ${color}"></div>
                     <div class="sensor-id">${sensor.sensor_id}</div>
-                    <div class="sensor-val" style="color: ${color}">${sensor.leq_dba.toFixed(1)} dB</div>
+                    <div class="sensor-val" style="color: ${color}">${sensor.leq_dbz.toFixed(1)} dB</div>
                 `;
                 el.onclick = () => { map.flyTo([sensor.lat, sensor.lng], 16); };
                 list.appendChild(el);
@@ -357,7 +357,7 @@
                 
                 const heatData = data.grid.map(pt => {
                     // Normalize 50dB-100dB range to 0.0-1.0
-                    let intensity = (pt.leq_dba - 50) / 50; 
+                    let intensity = (pt.leq_dbz - 50) / 50; 
                     intensity = Math.max(0, Math.min(1, intensity));
                     return [pt.lat, pt.lng, intensity];
                 });
@@ -370,7 +370,7 @@
                 }).addTo(map);
                 
                 data.readings.forEach(r => {
-                    const color = zoneColor(r.leq_dba);
+                    const color = zoneColor(r.leq_dbz);
                     const icon = L.divIcon({
                         className: 'map-marker',
                         html: `<div style="width: 14px; height: 14px; background: ${color}; border-radius: 50%;"></div>`,
@@ -380,9 +380,9 @@
                     
                     const marker = L.marker([r.lat, r.lng], {icon}).addTo(markerLayer);
                     marker.bindPopup(`
-                        <div style="font-weight: 600; margin-bottom: 4px; color: ${color}">${r.leq_dba.toFixed(1)} dB(A)</div>
+                        <div style="font-weight: 600; margin-bottom: 4px; color: ${color}">${r.leq_dbz.toFixed(1)} dB(Z)</div>
                         <div style="font-family: var(--font-sans); font-weight: 500; font-size: 0.85rem; color: var(--muted)">${r.sensor_id}</div>
-                        <div style="font-size: 0.75rem; margin-top: 6px; letter-spacing: 1px">${zoneLabel(r.leq_dba)}</div>
+                        <div style="font-size: 0.75rem; margin-top: 6px; letter-spacing: 1px">${zoneLabel(r.leq_dbz)}</div>
                     `);
                 });
                 
@@ -409,11 +409,11 @@
             status.style.border = "1px solid var(--caution)";
             
             const demoReadings = [
-                { sensor_id:"sensor-01", lat:41.3275, lng:19.8187, leq_dba:78.3 },
-                { sensor_id:"sensor-02", lat:41.3310, lng:19.8220, leq_dba:91.5 },
-                { sensor_id:"sensor-03", lat:41.3240, lng:19.8140, leq_dba:62.1 },
-                { sensor_id:"sensor-04", lat:41.3350, lng:19.8100, leq_dba:55.8 },
-                { sensor_id:"sensor-05", lat:41.3200, lng:19.8300, leq_dba:83.7 },
+                { sensor_id:"sensor-01", lat:41.3275, lng:19.8187, leq_dbz:78.3 },
+                { sensor_id:"sensor-02", lat:41.3310, lng:19.8220, leq_dbz:91.5 },
+                { sensor_id:"sensor-03", lat:41.3240, lng:19.8140, leq_dbz:62.1 },
+                { sensor_id:"sensor-04", lat:41.3350, lng:19.8100, leq_dbz:55.8 },
+                { sensor_id:"sensor-05", lat:41.3200, lng:19.8300, leq_dbz:83.7 },
             ];
             
             document.getElementById('stat-sensors').innerText = demoReadings.length;
@@ -461,13 +461,13 @@
                         let d = Math.max(Math.sqrt(d_lat*d_lat + d_lng*d_lng), 1e-6);
                         
                         let w = 1.0 / Math.pow(d, pwr);
-                        let linear = Math.pow(10, r.leq_dba / 10);
+                        let linear = Math.pow(10, r.leq_dbz / 10);
                         numer += w * linear;
                         denom += w;
                     });
                     
-                    let dba = 10 * Math.log10(numer / denom);
-                    grid.push([lat, lng, Math.max(0, Math.min(1, (dba - 50)/50))]);
+                    let dbz = 10 * Math.log10(numer / denom);
+                    grid.push([lat, lng, Math.max(0, Math.min(1, (dbz - 50)/50))]);
                 }
             }
             

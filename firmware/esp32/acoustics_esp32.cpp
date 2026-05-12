@@ -10,7 +10,7 @@
  *   2. SDCardManager   — SD mount, directory init
  *   3. DatabaseManager — SQLite open, schema, default config
  *   4. ESP32ConfigManager — load config from DB
- *   5. SPIMasterManager — SPI bus init, push config to Arduino
+ *   5. UARTManager      — UART init, push config to Arduino
  *   6. Wi-Fi connection
  *   7. NTP time sync (optional — falls back to millis if unavailable)
  *   8. AcouWebServer   — start HTTP server on port 80
@@ -34,7 +34,7 @@
 #include "sd_card_manager.h"
 #include "database_manager.h"
 #include "config_manager.h"
-#include "spi_master_manager.h"
+#include "uart_manager.h"
 #include "web_server.h"
 #include "bluetooth_manager.h"
 #include "sync_manager.h"
@@ -137,8 +137,8 @@ void setup() {
         ESP32ConfigManager::init();
     }
 
-    // 4. SPI Master (requires Config)
-    SPIMasterManager::init();
+    // 4. UART Master (requires Config)
+    UARTManager::init();
 
     // 5. Wi-Fi
     // Always expose a local setup/dashboard network. Station mode is optional.
@@ -175,7 +175,7 @@ void setup() {
 
 void loop() {
     // All modules are non-blocking — update unconditionally
-    SPIMasterManager::update();    // 10s SPI poll cycle
+    UARTManager::update();    // 10s UART poll cycle
     BluetoothManager::update();    // Continuous BLE scan management
     SyncManager::update();         // 5-minute sync cycle
     AcouWebServer::update();       // No-op (async server is self-driven)
